@@ -36,7 +36,7 @@ expected_probabilities = []
 
 sim = Aer.get_backend('aer_simulator')
 while lmbda <= lmbda_stop:
-    ry_theta = 2 * np.arcsin(np.sqrt(lmbda))
+    ry_theta = 2 * np.arccos(np.sqrt(1-lmbda))
     lmbdas.append(lmbda)
     lmbda += lmbda_step
 
@@ -44,14 +44,14 @@ while lmbda <= lmbda_stop:
     expected_probabilities.append(expected_probability)
 
     qc = QuantumCircuit(1,1)
-    qc.ry(-1 * ry_theta,0)
+    qc.ry(ry_theta,0)
     for x in range(l):
         ## St_beta
         qc.p(beta_j[x],0)
         ## Ss_alpha
-        qc.ry(ry_theta,0)
-        qc.rz(-1 * alpha_j[x],0)
         qc.ry(-1 * ry_theta,0)
+        qc.rz(alpha_j[x],0)
+        qc.ry(ry_theta,0)
     qc.measure(0,0)
     counts_qc = execute(qc, sim, shot=shots).result().get_counts()
     if counts_qc.get('1') == None:
