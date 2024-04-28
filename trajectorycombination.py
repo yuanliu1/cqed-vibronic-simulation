@@ -4,7 +4,7 @@ import numpy as np
 
 available_trajectories = 20
 
-data_file_loc = 'data/1x20/'
+data_file_loc = 'data/unbalanced_c_g_b/'
 data_file_prefix = ''
 data_file_postfix = '.out'
 data_file_start = 1
@@ -21,7 +21,7 @@ columns = []
 
 for x in range(len(data_files)):
     # print(data_files[x])
-    df = pd.read_csv(data_files[x], delimiter='\(|\+0\.0*e\+00j\) *\(|\+0\.0*e\+00j\)', engine = 'python')
+    df = pd.read_csv(data_files[x], delimiter='\s*\(|[\+-]\d\.\d+e[\+-]\d+j\) *\(|[\+-]\d\.\d+e[\+-]\d+j\)', engine = 'python')
     ## Drop first and last column, as they are blank (thanks to delimiter pattern used)
     df.drop(columns=df.columns[0], axis=1, inplace=True)
     df.drop(columns=df.columns[len(df.columns)-1], axis=1, inplace=True)
@@ -30,6 +30,7 @@ for x in range(len(data_files)):
     data.append(df.to_numpy())
     columns.append(df.columns.to_numpy())
     #print(columns[x][0])
+
 
 mean = np.mean(data,axis=0)
 

@@ -8,13 +8,13 @@ import cmath as math
 
 
 ## Constants
-delta = np.sqrt(.1)
-l = 5
+delta = np.sqrt(.04)
+l = 2
 lmbda_step = .002
 lmbda_stop = 1
 lmbda = 0
 shots = 1000
-
+  
 ## Calculated Constants
 L = 2 * l + 1
 gamma = 1 / (np.cos((1/L) * math.acos(1/delta)))
