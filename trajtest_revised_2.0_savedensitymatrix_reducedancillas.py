@@ -211,7 +211,7 @@ timestep = 0.01
 time = np.round(np.arange(sim_steps) * timestep, 5)
 
 # Damping phase so damping probability is sin(theta/2)^2 = (gamma_all*timestep)
-gamma = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # gamma_a/max
+gamma = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # gamma_a/max
 
 ## Initializes circuit
 qmr, qbr, cbits, circuit = initialize_circuit()
@@ -230,7 +230,7 @@ for i in range(sim_steps):
         H1(timestep/2, reverse = True)
         H0(timestep/2, reverse = True)
         # Now include damping from https://arxiv.org/pdf/2302.14592.pdf (Fig 8)
-        for idx_qb in range(numberofmodes):
+        for idx_qb in range(numberofmodes-1):
             idx_damp = numberofmodes
             circuit.ry(theta[idx_qb]/2, qbr[idx_damp])
             circuit.cx(qbr[idx_qb], qbr[idx_damp])
