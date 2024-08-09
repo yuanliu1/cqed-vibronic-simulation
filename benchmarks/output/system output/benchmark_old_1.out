@@ -1,0 +1,70 @@
+no change     /usr/local/apps/miniconda20230831/condabin/conda
+no change     /usr/local/apps/miniconda20230831/bin/conda
+no change     /usr/local/apps/miniconda20230831/bin/conda-env
+no change     /usr/local/apps/miniconda20230831/bin/activate
+no change     /usr/local/apps/miniconda20230831/bin/deactivate
+no change     /usr/local/apps/miniconda20230831/etc/profile.d/conda.sh
+no change     /usr/local/apps/miniconda20230831/etc/fish/conf.d/conda.fish
+no change     /usr/local/apps/miniconda20230831/shell/condabin/Conda.psm1
+no change     /usr/local/apps/miniconda20230831/shell/condabin/conda-hook.ps1
+no change     /usr/local/apps/miniconda20230831/lib/python3.11/site-packages/xontrib/conda.xsh
+no change     /usr/local/apps/miniconda20230831/etc/profile.d/conda.csh
+no change     /home/ddong2/.bashrc
+No action taken.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@c037n01>
+Subject: Job 835643: <bosonic_chromophore_model> in cluster <Hazel> Done
+
+Job <bosonic_chromophore_model> was submitted from host <login02> by user <ddong2> in cluster <Hazel> at Fri Aug  2 12:48:02 2024
+Job was executed on host(s) <16*c037n01>, in queue <single_chassis>, as user <ddong2> in cluster <Hazel> at Fri Aug  2 12:48:03 2024
+</home/ddong2> was used as the home directory.
+</rs1/researchers/y/yliu335/ddong2/final_runs> was used as the working directory.
+Started at Fri Aug  2 12:48:03 2024
+Terminated at Fri Aug  2 14:55:32 2024
+Results reported at Fri Aug  2 14:55:32 2024
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -n 16
+#BSUB -W 5:00
+#BSUB -R span[hosts=1]
+#BSUB -R "select[model==Gold6130]"
+#BSUB -J bosonic_chromophore_model
+#BSUB -o benchmark_old_1.out
+#BSUB -e benchmark_old_1.err
+source ~/.bashrc
+conda init
+conda activate /usr/local/usrapps/qbe/ddong2/biskit
+export OMP_NUM_THREADS=$LSB_DJOB_NUMPROC
+python run_benchmark_old.py /rs1/researchers/y/yliu335/ddong2/final_runs/data/benchmark_old
+conda deactivate
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   109579.88 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              8
+    Max Threads :                                36
+    Run time :                                   7655 sec.
+    Turnaround time :                            7650 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <benchmark_old_1.err> for stderr output of this job.
+

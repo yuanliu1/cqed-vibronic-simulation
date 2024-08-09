@@ -1,11 +1,11 @@
 ## Import packages
 import os
 import sys
-module_path = os.path.abspath(os.path.join("../"))
+module_path = os.path.abspath(os.path.join("../../"))
 if module_path not in sys.path:
 	sys.path.append(module_path)
 
-module_path = os.path.abspath(os.path.join("../venv/Lib/site-packages"))
+module_path = os.path.abspath(os.path.join("../../venv/Lib/site-packages"))
 if module_path not in sys.path:
 	sys.path.append(module_path)
 
@@ -32,17 +32,18 @@ _, result, _ = c2qa.util.simulate(circuit_test)
 
 ## Now we go into building the model
 
-output_name = 'C:/Users/danie/Downloads/bosonic'
+output_name = '/share/qbe/ddong2/runs/data/1'
+output_name = sys.argv[1]
 
 # Global parameters
-omega = np.array([4.79e13, 4.8e13, 4.79e13, 6e12])/1e12 #omega_a,b,c,l
+omega = np.array([4.79e13, 4.8e13, 4.785e13, 6e12])/1e12 #omega_a,b,c,l
 # omega_q = np.array([-1.14e12, -1.43e12, -7.92e11])/1e12 #omega_qb,qb,qc
-delta_qa = np.array([-1.14e12-(-1.43e12), -1.14e12-(-7.92e11)])/1e12 #delta_ab,ac
+delta_qa = np.array([8.934e11, 2.55e11])/1e12 #delta_ab,ac
 chi = np.array([-3.2e12, -3.6e12, -2.7e12])/1e12 #chi_a,b,c
-g_cd = np.array([4.63e12, 4.13e12, 5.09e12])/1e12 #g_cda,cdb,cdc
-g_cdl = (1.9e12+0.0j)/1e12 #g_cdl
+g_cd = np.array([4.63e12, 4.1323e12, 5.0938e12])/1e12 #g_cda,cdb,cdc
+g_cdl = (1.8974e12+0.0j)/1e12 #g_cdl
 g_a = np.array([3e12, 2.7e12])/1e12 #g_ab,ac
-g_al = np.array([-3e11, 2.7e12*0.15])/1e12 #g_abl,acl
+g_al = np.array([-3e11, 4.05e11])/1e12 #g_abl,acl
 global k_t
 k_t = 100 #trot steps
 
@@ -54,10 +55,9 @@ cutoff=2**numberofqubitspermode
 
 def initialize_circuit():
     qmr = c2qa.QumodeRegister(num_qumodes=numberofmodes, num_qubits_per_qumode=numberofqubitspermode)
-    qbr = QuantumRegister(size = numberofmodes)
-    qdp = QuantumRegister(size = numberofmodes)
-    circuit = c2qa.CVCircuit(qmr, qbr, qdp)
-    return qmr, qbr, qdp, circuit
+    qbr = QuantumRegister(size = 2*numberofmodes)
+    circuit = c2qa.CVCircuit(qmr, qbr)
+    return qmr, qbr, circuit
 
 # Build circuit for exp(-iH_0*tau) Needs trotterization.
 def H0(tau, steps=k_t, omega_list=omega, delta_list=delta_qa, reverse = False):
@@ -92,11 +92,11 @@ def H1(tau, steps=k_t, chi_list = chi, g_cd_list = g_cd, reverse = False):
 
 # Build circuit for exp(-iH_2*tau) Rotated version: Split H2XX and H2YY
 def H2XX(tau, steps=k_t, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
-    g_at = 2*tau*g_a_list/steps
+    g_at = tau*g_a_list/steps
     g_alt = -1j*tau*g_al_list/steps
     if not reverse:
         for i_qumode in range(2): # ab and ac
-            circuit.rxx(g_at[i_qumode]/2, qbr[0], qbr[1+i_qumode])
+            circuit.rxx(g_at[i_qumode], qbr[0], qbr[1+i_qumode])
     
         # Displaced qb for l controlled by sigma_a^x
         circuit.swap(qbr[0], qbr[3])
@@ -139,14 +139,14 @@ def H2XX(tau, steps=k_t, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = Fa
         
         for i_qumode in range(2): # ab and ac
             r_i_qumode = 1-i_qumode # reverse index
-            circuit.rxx(g_at[-i_qumode-1]/2, qbr[0], qbr[1+r_i_qumode])
+            circuit.rxx(g_at[-i_qumode-1], qbr[0], qbr[1+r_i_qumode])
 
 def H2YY(tau, steps=k_t, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
-    g_at = 2*tau*g_a_list/steps
+    g_at = tau*g_a_list/steps
     g_alt = -1j*tau*g_al_list/steps
     if not reverse:
         for i_qumode in range(2): # ab and ac
-            circuit.ryy(g_at[i_qumode]/2, qbr[0], qbr[1+i_qumode])
+            circuit.ryy(g_at[i_qumode], qbr[0], qbr[1+i_qumode])
     
         # Displaced qb for l controlled by sigma_a^x
         circuit.swap(qbr[0], qbr[3])
@@ -197,7 +197,7 @@ def H2YY(tau, steps=k_t, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = Fa
         
         for i_qumode in range(2): # ab and ac
             r_i_qumode = 1-i_qumode # reverse index
-            circuit.ryy(g_at[-i_qumode-1]/2, qbr[0], qbr[1+r_i_qumode])
+            circuit.ryy(g_at[-i_qumode-1], qbr[0], qbr[1+r_i_qumode])
 
 
 # Build circuit and do loop
@@ -207,12 +207,12 @@ from tqdm import tqdm
 rho_A = []
 rho_B = []
 rho_C = []
-sim_time = .04
+sim_time = 2.0
 tau = 0
 timestep = 0.01
 
 # Damping phase so damping probability is sin(theta/2)^2 = (gamma*timestep)^2
-gamma = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+gamma = np.array([3.15e12/1e12, 9.45e12/1e12, 1.05e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
 theta = 2*np.arcsin(np.sqrt(gamma*timestep))
 
 for i in tqdm(range(int(sim_time/timestep))):
@@ -220,11 +220,11 @@ for i in tqdm(range(int(sim_time/timestep))):
         print('Time: {}'.format(i*timestep))
     tau += timestep
     # k_t = max(50,int((i**2)/10))
-    # k_t = 3*i
+    # k_t = 1*i
     
     circuit = 0 # reinitialize circuit
 
-    qmr, qbr, qdp, circuit = initialize_circuit()
+    qmr, qbr, circuit = initialize_circuit()
     circuit.x(qbr[0])
 
     for i_steps in range(k_t):
@@ -236,22 +236,21 @@ for i in tqdm(range(int(sim_time/timestep))):
         H2XX(tau/2, steps = k_t, reverse = True)
         H1(tau/2, steps = k_t, reverse = True)
         H0(tau/2, steps = k_t, reverse = True)
-    # Now include damping from https://arxiv.org/pdf/2302.14592.pdf (Fig 8)
-        circuit.reset(qdp)
-        for idx_qb in range(numberofmodes):
-            circuit.ry(theta[idx_qb]/2, qdp[idx_qb])
-            circuit.cx(qbr[idx_qb], qdp[idx_qb])
-            circuit.ry(-theta[idx_qb]/2, qdp[idx_qb])
-            circuit.cx(qbr[idx_qb], qdp[idx_qb])
-            circuit.cx(qdp[idx_qb], qbr[idx_qb])
+        # Now include damping from https://arxiv.org/pdf/2302.14592.pdf (Fig 8)
+        #circuit.reset(qbr[numberofmodes:2*numberofmodes])
+        #for idx_qb in range(numberofmodes):
+        #    idx_damp = idx_qb + numberofmodes
+        #    circuit.ry(theta[idx_qb]/2, qbr[idx_damp])
+        #    circuit.cx(qbr[idx_qb], qbr[idx_damp])
+        #    circuit.ry(-theta[idx_qb]/2, qbr[idx_damp])
+        #    circuit.cx(qbr[idx_qb], qbr[idx_damp])
+        #    circuit.cx(qbr[idx_damp], qbr[idx_qb])
 
     stateop, result, _ = c2qa.util.simulate(circuit)
-    print(result.get_counts())
     density_matrix = DensityMatrix(np.asarray(c2qa.util.trace_out_qumodes(circuit, stateop)))
     rho_A.append(np.asarray(partial_trace(density_matrix,[1,2,3,4,5,6,7]))[1,1])
     rho_B.append(np.asarray(partial_trace(density_matrix,[0,2,3,4,5,6,7]))[1,1])
     rho_C.append(np.asarray(partial_trace(density_matrix,[0,1,3,4,5,6,7]))[1,1])
-    print(str(rho_A) + ", " +  str(rho_B) + ", " + str(rho_C))
 
 time = np.arange(0,len(rho_A))
 time = time*timestep

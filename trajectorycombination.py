@@ -4,11 +4,11 @@ import numpy as np
 
 available_trajectories = 20
 
-data_file_loc = 'data/unbalanced_c_g_b/'
-data_file_prefix = ''
+data_file_loc = 'data/undamped_tests/'
+data_file_prefix = 'undamped-k_t-'
 data_file_postfix = '.out'
-data_file_start = 1
-data_file_end = 20
+data_file_start = 100
+data_file_end = 100
 
 data_files = []
 
