@@ -20,7 +20,7 @@ gamma_A = 3.15e12
 gamma_B = 3.15e12
 gamma_C = 3.15e12
 
-
+# Parameter conversion
 omega_a = (omega_ga + omega_ea)/2
 omega_b = (omega_gb + omega_eb)/2
 omega_c = (omega_gc + omega_ec)/2
@@ -46,6 +46,7 @@ g_l = g_cd_l / 2
 delta_ab = omega_qa - omega_qb
 delta_ac = omega_qa - omega_qc
 
+# Parameter output
 print("omega_a: " + '{:.4e}'.format(omega_a))
 print("omega_b: " + '{:.4e}'.format(omega_b))
 print("omega_c: " + '{:.4e}'.format(omega_c))

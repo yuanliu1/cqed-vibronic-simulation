@@ -1,31 +1,59 @@
-# The C2QA pacakge is currently not published to PyPI.
-# To use the package locally, add the C2QA repository's root folder to the path prior to importing c2qa.
+################################################################
+## As the C2QA package is not currently published to any package managers, to use the package, add the C2QA 
+## To use the package locally, add the C2QA repository's root folder to the path prior to importing c2qa.
+################################################################
 import os
 import sys
-# module_path = os.path.abspath(os.path.join("../.."))
-module_path = os.path.abspath(os.path.join("../../"))
-if module_path not in sys.path:
-    sys.path.append(module_path)
-
-# Cheat to get MS Visual Studio Code Jupyter server to recognize Python venv
-module_path = os.path.abspath(os.path.join("../../venv/Lib/site-packages"))
-if module_path not in sys.path:
-    sys.path.append(module_path)
 
 import c2qa
-import qiskit
 import numpy as np
-import c2qa.util as util
 import matplotlib.pyplot as plt
-import matplotlib
-import scipy.sparse.linalg as LA
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, transpile
+from qiskit import ClassicalRegister, QuantumRegister
 from qiskit_aer.library import SaveDensityMatrix
 
-output_name = "nodamping"
-#output_name = sys.argv[1]
+################################################################
+#### Simulation Parameters
+################################################################
 
-## This is the TEST part, only need to run once
+## Name of output files- use sys.argv[1] if you want to set output name via command line
+output_name = "output"  # There will be a *.out and a *.{filetype} file if the simulation is successful
+output_filetype = "png" # The filetype for the matplotlib output - recommendations: 'png' or 'pdf'
+
+## Circuit parameters
+global numberofmodes, numberofqubitspermode
+numberofmodes=4         # Number of qumodes in the simulation
+numberofqubitspermode=2 # Number of qubits for each qumode. Fock level = 2^(#qubits).
+
+## Simulation parameters
+sim_steps = 201          # The number of steps in the trotter simulation
+timestep = 0.01          # The timestep for the trotter simulation
+shots = 1000             # Number of shots to run the simulation for - necessary only for damping channels
+amplitude_damping = True # Toggles on or off the amplitude damping channel
+dephasing = True         # Toggles on or off the dephasing channel
+time = np.round(np.arange(sim_steps) * timestep, 5)
+
+## Damping rates; damping probability = sin(theta/2)^2 = (gamma_all*timestep)
+# Amplitude Damping Rate and conversion to theta
+gamma_damp = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c]
+theta_damp = 2*np.arcsin(np.sqrt(gamma_damp*timestep))
+# Dephasing Rate and conversion to theta
+gamma_dephase = np.array([9.0e11/1e12, 9.0e11/1e12, 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c]
+theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
+
+## Global parameters
+omega = np.array([4.79e13, 4.8e13, 4.785e13, 6e12])/1e12 # omega_a,b,c,l
+delta_qa = np.array([8.934e11, 2.55e11])/1e12            # delta_ab,ac
+chi = np.array([-3.2e12, -3.6e12, -2.7e12])/1e12         # chi_a,b,c
+g_cd = np.array([4.63e12, 4.1323e12, 5.0938e12])/1e12    # g_cda,cdb,cdc
+g_cdl = (1.8974e12+0.0j)/1e12                            # g_cdl
+g_a = np.array([3e12, 2.7e12])/1e12                      # g_ab,ac
+g_al = np.array([-3e11, 4.05e11])/1e12                   # g_abl,acl
+
+################################################################
+#### Circuit Building
+################################################################
+
+## Test Circuit to ensure that c2qa works
 qmr_test = c2qa.QumodeRegister(4, num_qubits_per_qumode = 2)
 circuit_test = c2qa.CVCircuit(qmr_test)
 
@@ -36,30 +64,7 @@ circuit_test.cv_r(-6e11,qmr_test[3])
 
 _, result, _ = c2qa.util.simulate(circuit_test)
 
-# Global parameters
-omega = np.array([4.79e13, 4.8e13, 4.785e13, 6e12])/1e12 #omega_a,b,c,l
-# omega_q = np.array([-1.14e12, -1.43e12, -7.92e11])/1e12 #omega_qb,qb,qc
-delta_qa = np.array([8.934e11, 2.55e11])/1e12 #delta_ab,ac
-chi = np.array([-3.2e12, -3.6e12, -2.7e12])/1e12 #chi_a,b,c
-g_cd = np.array([4.63e12, 4.1323e12, 5.0938e12])/1e12 #g_cda,cdb,cdc
-g_cdl = (1.8974e12+0.0j)/1e12 #g_cdl
-g_a = np.array([3e12, 2.7e12])/1e12 #g_ab,ac
-g_al = np.array([-3e11, 4.05e11])/1e12 #g_abl,acl
-
-# Circuit initialize
-global numberofmodes, numberofqubitspermode, cutoff
-numberofmodes=4
-numberofqubitspermode=2
-cutoff=2**numberofqubitspermode
-
-def initialize_circuit():
-    qmr = c2qa.QumodeRegister(num_qumodes=numberofmodes, num_qubits_per_qumode=numberofqubitspermode)
-    qbr = QuantumRegister(size = numberofmodes + 1)
-    cbits = ClassicalRegister(size = numberofmodes)
-    circuit = c2qa.CVCircuit(qmr, qbr, cbits)
-    return qmr, qbr, cbits, circuit
-
-# Build circuit for exp(-iH_0*tau) Needs trotterization.
+## Build circuit for exp(-iH_0*tau) Needs trotterization.
 def H0(tau, omega_list=omega, delta_list=delta_qa, reverse = False):
     omega_t = -tau*omega_list
     delta_t = -tau*delta_list
@@ -75,7 +80,7 @@ def H0(tau, omega_list=omega, delta_list=delta_qa, reverse = False):
             circuit.cv_r(omega_t[i_qumode], qmr[i_qumode])
     circuit.barrier()
 
-# Build circuit for exp(-iH_1*tau)
+## Build circuit for exp(-iH_1*tau)
 def H1(tau, chi_list = chi, g_cd_list = g_cd, reverse = False):
     chi_t = tau*chi_list/(2)
     g_cdt = tau*g_cd_list/(2)*1j
@@ -90,7 +95,7 @@ def H1(tau, chi_list = chi, g_cd_list = g_cd, reverse = False):
             circuit.cv_c_r(chi_t[r_i_qumode], qmr[r_i_qumode], qbr[r_i_qumode])
     circuit.barrier()
 
-# Build circuit for exp(-iH_2*tau) Rotated version: Split H2XX and H2YY
+## Build circuit for exp(-iH_2*tau) Rotated version: Split H2XX and H2YY
 def H2XX(tau, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
     g_at = 2*tau*g_a_list
     g_alt = -1j*tau*g_al_list
@@ -154,7 +159,7 @@ def H2YY(tau, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
         circuit.swap(qbr[0], qbr[3])
         circuit.barrier()
     
-        # Displaced qb for l controlle by sigma_a^x*sigma_(b or c)^x
+        # Displaced qb for l controlled by sigma_a^x*sigma_(b or c)^x
         for i_qumode in range(1,3):
             circuit.rz(-np.pi/2,qbr[0])
             circuit.h(qbr[0])
@@ -199,27 +204,24 @@ def H2YY(tau, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
             r_i_qumode = 1-i_qumode # reverse index
             circuit.ryy(g_at[-i_qumode-1]/2, qbr[0], qbr[1+r_i_qumode])
 
-# Build circuit and do loop
-from qiskit.quantum_info import DensityMatrix, partial_trace
-from tqdm import tqdm
+################################################################
+#### Circuit Simulation
+################################################################
 
+## Data arrays
 rho_A = []
 rho_B = []
 rho_C = []
-sim_steps = 201
-timestep = 0.01
-time = np.round(np.arange(sim_steps) * timestep, 5)
 
-# Damping phase so damping probability is sin(theta/2)^2 = (gamma_all*timestep)
-gamma = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # gamma_a/max
-
-## Initializes circuit
-qmr, qbr, cbits, circuit = initialize_circuit()
+## Circuit initialization
+qmr = c2qa.QumodeRegister(num_qumodes=numberofmodes, num_qubits_per_qumode=numberofqubitspermode)
+qbr = QuantumRegister(size = numberofmodes + 1)
+cbits = ClassicalRegister(size = numberofmodes)
+circuit = c2qa.CVCircuit(qmr, qbr, cbits)
 circuit.x(qbr[0])
 
+## Build trotter simulation
 for i in range(sim_steps):
-    theta = 2*np.arcsin(np.sqrt(gamma*timestep))
-
     if i != 0:
         H0(timestep/2)
         H1(timestep/2)
@@ -229,17 +231,24 @@ for i in range(sim_steps):
         H2XX(timestep/2, reverse = True)
         H1(timestep/2, reverse = True)
         H0(timestep/2, reverse = True)
-        # Now include damping from https://arxiv.org/pdf/2302.14592.pdf (Fig 8)
-        for idx_qb in range(numberofmodes-1):
-            idx_damp = numberofmodes
-            circuit.ry(theta[idx_qb]/2, qbr[idx_damp])
-            circuit.cx(qbr[idx_qb], qbr[idx_damp])
-            circuit.ry(-theta[idx_qb]/2, qbr[idx_damp])
-            circuit.cx(qbr[idx_qb], qbr[idx_damp])
-            circuit.cx(qbr[idx_damp], qbr[idx_qb])
-            circuit.measure(qbr[idx_damp], cbits[idx_qb])
-            circuit.reset(qbr[numberofmodes:numberofmodes + 1])
+        # Amplitude damping channel inspired by https://arxiv.org/pdf/2302.14592.pdf (Fig 8)
+        idx_damp = numberofmodes
+        if (amplitude_damping):
+            for idx_qb in range(numberofmodes-1):
+                circuit.cry(theta_damp[idx_qb], qbr[idx_qb], qbr[idx_damp])
+                circuit.cx(qbr[idx_damp], qbr[idx_qb])
+                circuit.measure(qbr[idx_damp], cbits[idx_qb])
+                circuit.reset(qbr[numberofmodes:numberofmodes + 1])
+        # Phase Damping Channel
+        if (dephasing):
+            for idx_qb in range(numberofmodes-1):
+                circuit.ry(-theta_dephase[idx_qb]/2, qbr[idx_damp])
+                circuit.z(qbr[idx_damp])
+                circuit.cz(qbr[idx_qb], qbr[idx_damp])
+                circuit.measure(qbr[idx_damp], cbits[idx_qb])
+                circuit.reset(qbr[numberofmodes:numberofmodes + 1])
 
+    # We are able dramatically improve run times by saving the density matrix after every trotter step
     save_densitymatrix = SaveDensityMatrix(1, label='densitymatrix_a{}'.format(i))
     circuit.append(save_densitymatrix, [qbr[0]])
     save_densitymatrix = SaveDensityMatrix(1, label='densitymatrix_b{}'.format(i))
@@ -247,16 +256,17 @@ for i in range(sim_steps):
     save_densitymatrix = SaveDensityMatrix(1, label='densitymatrix_c{}'.format(i))
     circuit.append(save_densitymatrix, [qbr[2]])
     
-    
-stateop, result, _ = c2qa.util.simulate(circuit, shots=1000)
-
+## Simulate Circuit and obtain output data
+stateop, result, _ = c2qa.util.simulate(circuit, shots=shots)
 data = result.data()
 
+## Extract saved Density Matrix data
 for i in range(sim_steps):
     rho_A.append(np.asarray(data['densitymatrix_a{}'.format(i)])[1,1])
     rho_B.append(np.asarray(data['densitymatrix_b{}'.format(i)])[1,1])
     rho_C.append(np.asarray(data['densitymatrix_c{}'.format(i)])[1,1])
 
+## Graphing population dynamics
 fig, ax = plt.subplots()
 ax.set_title('Population Dynamics in the 1 state for Trotterized Hamiltonian')
 ax.plot(time, rho_A)
@@ -264,6 +274,6 @@ ax.plot(time, rho_B)
 ax.plot(time, rho_C)
 ax.legend(['Transmon A', 'Transmon B', 'Transmon C'])
 
-fig.savefig(output_name + '.png')
-
+## Saving Graph and output file
+fig.savefig(output_name + '.' + output_filetype)
 np.savetxt(output_name + '.out', (time, rho_A, rho_B, rho_C))
