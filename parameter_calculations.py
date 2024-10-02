@@ -16,9 +16,6 @@ S_a = 0.005
 S_b = 0.004
 S_c = 0.006
 S_l = 0.05 #tunable
-gamma_A = 3.15e12
-gamma_B = 3.15e12
-gamma_C = 3.15e12
 
 # Parameter conversion
 omega_a = (omega_ga + omega_ea)/2

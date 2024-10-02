@@ -1,5 +1,5 @@
 ################################################################
-## As the C2QA package is not currently published to any package managers, to use the package, add the C2QA 
+## As the C2QA package is not currently published to any package managers, to use the package, add the 'c2qa' 
 ## To use the package locally, add the C2QA repository's root folder to the path prior to importing c2qa.
 ################################################################
 import os
@@ -33,11 +33,11 @@ dephasing = True         # Toggles on or off the dephasing channel
 time = np.round(np.arange(sim_steps) * timestep, 5)
 
 ## Damping rates; damping probability = sin(theta/2)^2 = (gamma_all*timestep)
-# Amplitude Damping Rate and conversion to theta
-gamma_damp = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c]
+ # Amplitude Damping Rate and conversion to theta
+gamma_damp = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
 theta_damp = 2*np.arcsin(np.sqrt(gamma_damp*timestep))
-# Dephasing Rate and conversion to theta
-gamma_dephase = np.array([9.0e11/1e12, 9.0e11/1e12, 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c]
+ # Dephasing Rate and conversion to theta
+gamma_dephase = np.array([9.0e11/1e12, 9.0e11/1e12, 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
 theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
 
 ## Global parameters
@@ -215,7 +215,7 @@ rho_C = []
 
 ## Circuit initialization
 qmr = c2qa.QumodeRegister(num_qumodes=numberofmodes, num_qubits_per_qumode=numberofqubitspermode)
-qbr = QuantumRegister(size = numberofmodes + 1)
+qbr = QuantumRegister(size = numberofmodes)
 cbits = ClassicalRegister(size = numberofmodes)
 circuit = c2qa.CVCircuit(qmr, qbr, cbits)
 circuit.x(qbr[0])
@@ -232,16 +232,16 @@ for i in range(sim_steps):
         H1(timestep/2, reverse = True)
         H0(timestep/2, reverse = True)
         # Amplitude damping channel inspired by https://arxiv.org/pdf/2302.14592.pdf (Fig 8)
-        idx_damp = numberofmodes
+        idx_damp = numberofmodes - 1
         if (amplitude_damping):
-            for idx_qb in range(numberofmodes-1):
+            for idx_qb in range(numberofmodes - 1):
                 circuit.cry(theta_damp[idx_qb], qbr[idx_qb], qbr[idx_damp])
                 circuit.cx(qbr[idx_damp], qbr[idx_qb])
                 circuit.measure(qbr[idx_damp], cbits[idx_qb])
                 circuit.reset(qbr[numberofmodes:numberofmodes + 1])
-        # Phase Damping Channel
+        # Dephasing Channel
         if (dephasing):
-            for idx_qb in range(numberofmodes-1):
+            for idx_qb in range(numberofmodes - 1):
                 circuit.ry(-theta_dephase[idx_qb]/2, qbr[idx_damp])
                 circuit.z(qbr[idx_damp])
                 circuit.cz(qbr[idx_qb], qbr[idx_damp])
