@@ -1,25 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Equation : cd_rate * delta_t = alpha * machine_time * chi
-# Testing for a range of alpha
-alpha = np.array(range(15,40))
-# Conditional displacement (/s)
-cd_rates = np.array([2.68e12, 1.9e12, 0])
-# (s) The timestep in simulation
-delta_t = 1e-14
-# (/s)
-chi = 100000*np.pi
-# (/s)
-error_rate = 1.6e4
+############################################################
+##  Caculates and graphs the range of possible CD error rates
+##  based on the CD rate performed and the tunable alpha value
+############################################################
 
+## Equation : cd_rate * delta_t = alpha * machine_time * chi
+
+alpha = np.array(range(15,40))            # Testing for a range of alpha
+cd_rates = np.array([2.68e12, 1.9e12, 0]) # (/s) Conditional displacement rates (variable)
+delta_t = 1e-14                           # (s) The timestep in simulation
+chi = 100000*np.pi                        # (/s) The dispersive coupling between two modes
+error_rate = 1.6e4                        # (/s) The number of CD errors occuring per second
+
+## Graph labels and colors
 labels = ['β=2.68x$10^{12}$', 'β=1.90x$10^{12}$', 'β=0.00']
 colors = ['#2f0033', '#4f0056', '#870093']
 
 fidelity = []
 for x in range(len(cd_rates)):
-    # The amount of machine time required to run the gate (s)
-    machine_time = (cd_rates[x] * delta_t)/(alpha * chi)
+    machine_time = (cd_rates[x] * delta_t)/(alpha * chi) # The amount of machine time required to run the gate (s)
     fidelity.append(error_rate * machine_time)
     plt.plot(alpha, fidelity[x], label=labels[x], color=colors[x])
     

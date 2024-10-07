@@ -2,6 +2,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+#########################################################
+##  Code to combine a series of data files into one. 
+##  
+##  This can be useful for longer simulations, to split up the work 
+##  between multiple compute nodes. We were able to optimize the code
+##  the point where is code is redundant for our system size of 3 chromophores
+#########################################################
+
 ## Series of data files to combine
 data_file_loc = 'data/undamped_tests/'
 data_file_prefix = 'undamped-k_t-'
@@ -29,7 +37,7 @@ for x in range(len(data_files)):
     # print(df)
     data.append(df.to_numpy())
     columns.append(df.columns.to_numpy())
-    #print(columns[x][0])
+    # print(columns[x][0])
 
 ## Data aggregation
 mean = np.mean(data,axis=0)

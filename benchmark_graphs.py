@@ -2,6 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+#########################################################
+##  Specialized code for displaying multiple identical runs of a simulation
+##  with another simulation. Used for the benchmark graphs
+#########################################################
+
 mode = 0 # 0 means fock level benchmark, 1 means trotter benchmark
 
 if mode == 0:
