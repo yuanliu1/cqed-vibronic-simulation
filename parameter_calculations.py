@@ -1,6 +1,11 @@
 import numpy as np
 
-#standard parameters
+############################################################
+##  Calculates the parameters of the vibronic Hamiltonian in the
+##  cQED language in Hz from the base parameters in Table 1
+############################################################
+
+## Standard parameters
 omega_ga = 4.95e13
 omega_ea = 4.63e13
 omega_gb = 4.98e13
@@ -16,11 +21,8 @@ S_a = 0.005
 S_b = 0.004
 S_c = 0.006
 S_l = 0.05 #tunable
-gamma_A = 3.15e12
-gamma_B = 3.15e12
-gamma_C = 3.15e12
 
-
+## Parameter conversion
 omega_a = (omega_ga + omega_ea)/2
 omega_b = (omega_gb + omega_eb)/2
 omega_c = (omega_gc + omega_ec)/2
@@ -46,6 +48,7 @@ g_l = g_cd_l / 2
 delta_ab = omega_qa - omega_qb
 delta_ac = omega_qa - omega_qc
 
+## Parameter output
 print("omega_a: " + '{:.4e}'.format(omega_a))
 print("omega_b: " + '{:.4e}'.format(omega_b))
 print("omega_c: " + '{:.4e}'.format(omega_c))

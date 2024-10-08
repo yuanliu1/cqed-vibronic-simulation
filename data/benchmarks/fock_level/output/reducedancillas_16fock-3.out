@@ -1,0 +1,69 @@
+no change     /usr/local/apps/miniconda20230831/condabin/conda
+no change     /usr/local/apps/miniconda20230831/bin/conda
+no change     /usr/local/apps/miniconda20230831/bin/conda-env
+no change     /usr/local/apps/miniconda20230831/bin/activate
+no change     /usr/local/apps/miniconda20230831/bin/deactivate
+no change     /usr/local/apps/miniconda20230831/etc/profile.d/conda.sh
+no change     /usr/local/apps/miniconda20230831/etc/fish/conf.d/conda.fish
+no change     /usr/local/apps/miniconda20230831/shell/condabin/Conda.psm1
+no change     /usr/local/apps/miniconda20230831/shell/condabin/conda-hook.ps1
+no change     /usr/local/apps/miniconda20230831/lib/python3.11/site-packages/xontrib/conda.xsh
+no change     /usr/local/apps/miniconda20230831/etc/profile.d/conda.csh
+no change     /home/ddong2/.bashrc
+No action taken.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@c018n01>
+Subject: Job 59330: <bosonic_chromophore_model> in cluster <Hazel> Done
+
+Job <bosonic_chromophore_model> was submitted from host <login03> by user <ddong2> in cluster <Hazel> at Wed Aug 14 18:14:09 2024
+Job was executed on host(s) <32*c018n01>, in queue <long>, as user <ddong2> in cluster <Hazel> at Fri Aug 16 10:54:35 2024
+</home/ddong2> was used as the home directory.
+</rs1/researchers/y/yliu335/ddong2/final_runs> was used as the working directory.
+Started at Fri Aug 16 10:54:35 2024
+Terminated at Mon Aug 19 18:39:58 2024
+Results reported at Mon Aug 19 18:39:58 2024
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -n 32
+#BSUB -W 120:00
+#BSUB -R span[hosts=1]
+#BSUB -J bosonic_chromophore_model
+#BSUB -o reducedancillas_16fock-3.out
+#BSUB -e reducedancillas_16fock-3.err
+source ~/.bashrc
+conda init
+conda activate /usr/local/usrapps/qbe/ddong2/biskit
+export OMP_NUM_THREADS=$LSB_DJOB_NUMPROC
+python run_benchmark_reducedancillas.py /rs1/researchers/y/yliu335/ddong2/final_runs/data/reducedancillas_16fock-3
+conda deactivate
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   9038240.00 sec.
+    Max Memory :                                 3 GB
+    Average Memory :                             2.98 GB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              4
+    Max Threads :                                68
+    Run time :                                   287151 sec.
+    Turnaround time :                            433549 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <reducedancillas_16fock-3.err> for stderr output of this job.
+
