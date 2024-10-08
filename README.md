@@ -21,18 +21,13 @@ As bosonic-qiskit is not published to any package managers, the c2qa root folder
 
 ## Contents
 Here is an explanation of all of the items in this repository
-| File | Description |
-data/ : A repository of all the data and graphs generated for our paper
-- 3_chromophore_exact.ipynb: An exact simulation of our 3-chromophore system in qutip
-### 3_chromophore_vibronic_simulation.py
-A simulation of our 3-chromophore system using c2qa. 
-### benchmark_graphs.py
-A specialized graph generator for diplaying multiple simulation runs against a single simulation run
-### cd_fidelity.py
-Calculates the possible ranges of conditional displacement error rates
-### graph_creation.py
-A general graph generator for displaying a n-length column of simulation graphs
-### parameter_calculations.py
-Calculates the various parameters for our simulation
-### trajectorycombination.py
-Combines multiple data files together, averaging their counts together.
+| Item | Description |
+|---------|------------|
+| /data/ | A repository of all the data and graphs generated for our paper |
+| /3_chromophore_exact.ipynb | An exact simulation of our 3-chromophore system in qutip |
+| /3_chromophore_vibronic_simulation.py | A simulation of our 3-chromophore system using c2qa.  |
+| /benchmark_graphs.py | A specialized graph generator for diplaying multiple simulation runs against a single simulation run |
+| /cd_fidelity.py | Calculates the possible ranges of conditional displacement error rates |
+| /graph_creation.py | A general graph generator for displaying a n-length column of simulation graphs |
+| /parameter_calculations.py | Calculates the various parameters for our simulation |
+| /trajectorycombination.py | Combines multiple data files together, averaging their counts together. |
