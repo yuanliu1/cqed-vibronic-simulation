@@ -22,7 +22,7 @@ output_filetype = "png" # The filetype for the matplotlib output - recommendatio
 ## Circuit parameters
 global numberofmodes, numberofqubitspermode
 numberofmodes=4         # Number of qumodes in the simulation
-numberofqubitspermode=2 # Number of qubits for each qumode. Fock level = 2^(#qubits).
+numberofqubitspermode=3 # Number of qubits for each qumode. Fock level = 2^(#qubits).
 
 ## Simulation parameters
 sim_steps = 201          # The number of steps in the trotter simulation
