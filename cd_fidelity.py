@@ -15,7 +15,7 @@ chi = 100000*np.pi                        # (/s) The dispersive coupling between
 error_rate = 1.6e4                        # (/s) The number of CD errors occuring per second
 
 ## Graph labels and colors
-labels = ['β=2.68x$10^{12}$', 'β=1.90x$10^{12}$', 'β=0.00']
+labels = ['β=0.0268', 'β=0.019', 'β=0.00']
 colors = ['#2f0033', '#4f0056', '#870093']
 
 fidelity = []
@@ -35,7 +35,7 @@ plt.ylabel('Error Probability', **{'size':14})
 plt.axvspan(20, 30, color='red', alpha=0.5)
 
 
-print("α=20: " + str(fidelity[0][20-15]))
-print("α=30: " + str(fidelity[0][30-15]))
+print("α=20: " + str(fidelity[1][20-15]))
+print("α=30: " + str(fidelity[1][30-15]))
 plt.show()
 

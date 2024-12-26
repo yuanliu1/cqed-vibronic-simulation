@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 ################################################################
 ##  Generates an n-length column of connected graphs
@@ -9,18 +10,20 @@ import matplotlib.pyplot as plt
 ##  should be identical if they are enabled. 
 ################################################################
 
+datatype = 0 # 0 - csv, else - numpy binary
 comparison = True # Whether to have the comparison background graph behind every graph
 enable_legend = True # Whether to enable the graph legend
 legend_loc = 1 # Where to put the legend in the graph
 data_zorder = 2.5 # The order of the data on the graphs - <2 means than the secondary data should be in front
 
 ## Primary data files - solid line
-datafiles = ['data/general/phasedamping.out', 'data/general/phasedamping-0.9-2.7-0.9.out', 'data/general/phasedamping-0.9-0.3-0.9.out']
-datalabels = ['Deph.', 'Incr.', 'Decr.']
+datafiles = ['data/general/amplitudedamping.out', 'data/general/amplitudedamping-9.45.out', 'data/general/amplitudedamping-1.05.out']
+datalabels = ['Damp.', 'Incr.', 'Decr.']
 
 ## Secondary data files - dashed line
 secondarydata = ['data/general/nodamping.out', datafiles[0], datafiles[0]]
 secondarydatalabels = ['Pure', datalabels[0], datalabels[0]]
+
 
 ## Leave blank for no markers - see https://matplotlib.org/stable/api/markers_api.html
 secondary_marker = ''
@@ -35,8 +38,24 @@ secondaryC = '#ff5b5b'
 
 y_pad = 7
 
-## The regex delimiter used to get the data from the C2QA output
-delimiter = '\s*\(|[\+-]\d\.\d+e[\+-]\d+j\) *\(|[\+-]\d\.\d+e[\+-]\d+j\)'
+def get_csv_data(file):
+    ## The regex delimiter used to get the data from the C2QA output
+    delimiter = '\s*\(|[\+-]\d\.\d+e[\+-]\d+j\) *\(|[\+-]\d\.\d+e[\+-]\d+j\)'
+    ## Read in data
+    df = pd.read_csv(file, delimiter=delimiter, engine = 'python')
+    ## Drop first and last column, as they are blank (thanks to delimiter pattern used)
+    df.drop(columns=df.columns[0], axis=1, inplace=True)
+    df.drop(columns=df.columns[len(df.columns)-1], axis=1, inplace=True)
+    df.columns = df.columns.map(float)
+    rows = df.to_numpy()
+    columns = df.columns.to_numpy()
+    return rows, columns
+
+def get_numpy_data(file):
+    data = np.load(file)
+    rows = [data[data.files[1]], data[data.files[2]], data[data.files[3]]]
+    columns = data[data.files[0]]
+    return rows, columns
 
 ## Graph genreration
 fig = plt.figure()
@@ -51,30 +70,26 @@ if len(datafiles) == 1:
 
 ## Iterates through all of the data files
 for n in range(len(datafiles)):
-    ## Read in data
-    df = pd.read_csv(datafiles[n], delimiter=delimiter, engine = 'python')
-    ## Drop first and last column, as they are blank (thanks to delimiter pattern used)
-    df.drop(columns=df.columns[0], axis=1, inplace=True)
-    df.drop(columns=df.columns[len(df.columns)-1], axis=1, inplace=True)
-    df.columns = df.columns.map(float)
-    data = df.to_numpy()
-    columns = df.columns.to_numpy()
+    
+    if datatype == 0:
+        rows, columns = get_csv_data(datafiles[n])
+    else:
+        rows, columns = get_numpy_data(datafiles[n])
+
     ## Plot data
-    axs[n].plot(columns, data[0], linewidth=1.5, label=datalabels[n] + " A", color=maincolorA, zorder=data_zorder)
-    axs[n].plot(columns, data[1], linewidth=1.5, label=datalabels[n] + " B", color=maincolorB, zorder=data_zorder)
-    axs[n].plot(columns, data[2], linewidth=1.5, label=datalabels[n] + " C", color=maincolorC, zorder=data_zorder)
+    axs[n].plot(columns, rows[0], linewidth=1.5, label=datalabels[n] + " A", color=maincolorA, zorder=data_zorder)
+    axs[n].plot(columns, rows[1], linewidth=1.5, label=datalabels[n] + " B", color=maincolorB, zorder=data_zorder)
+    axs[n].plot(columns, rows[2], linewidth=1.5, label=datalabels[n] + " C", color=maincolorC, zorder=data_zorder)
 
     ## Displays the secondary data if comparison is True
     if comparison:
-        df = pd.read_csv(secondarydata[n], delimiter=delimiter, engine = 'python')
-        df.drop(columns=df.columns[0], axis=1, inplace=True)
-        df.drop(columns=df.columns[len(df.columns)-1], axis=1, inplace=True)
-        df.columns = df.columns.map(float)
-        data = df.to_numpy()
-        columns = df.columns.to_numpy()
-        axs[n].plot(columns, data[0], '--', linewidth=1.5, label=secondarydatalabels[n] + " A", color=secondaryA, marker=secondary_marker)
-        axs[n].plot(columns, data[1], '--', linewidth=1.5, label=secondarydatalabels[n] + " B", color=secondaryB, marker=secondary_marker)
-        axs[n].plot(columns, data[2], '--', linewidth=1.5, label=secondarydatalabels[n] + " C", color=secondaryC, marker=secondary_marker)
+        if datatype == 0:
+            rows, columns = get_csv_data(secondarydata[n])
+        else:
+            rows, columns = get_numpy_data(secondarydata[n])
+        axs[n].plot(columns, rows[0], '--', linewidth=1.5, label=secondarydatalabels[n] + " A", color=secondaryA, marker=secondary_marker)
+        axs[n].plot(columns, rows[1], '--', linewidth=1.5, label=secondarydatalabels[n] + " B", color=secondaryB, marker=secondary_marker)
+        axs[n].plot(columns, rows[2], '--', linewidth=1.5, label=secondarydatalabels[n] + " C", color=secondaryC, marker=secondary_marker)
 
     ## Displays the lenged if enable_legend is True
     if enable_legend:
