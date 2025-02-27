@@ -24,29 +24,34 @@ from qiskit_aer.library import SaveDensityMatrix
 ################################################################
 
 ## Name of output files- use sys.argv[1] if you want to set output name via command line
-output_name = sys.argv[1]  # There will be a *.out and a *.{filetype} file if the simulation is successful
+output_name = sys.argv[9]  # There will be a *.out and a *.{filetype} file if the simulation is successful
 output_filetype = "png" # The filetype for the matplotlib output - recommendations: 'png' or 'pdf'
 
 ## Circuit parameters
 global numberofmodes, numberofqubitspermode
 numberofmodes=4         # Number of qumodes in the simulation
-numberofqubitspermode=3 # Number of qubits for each qumode. Fock level = 2^(#qubits).
+numberofqubitspermode=sys.argv[8] # Number of qubits for each qumode. Fock level = 2^(#qubits).
 
 ## Simulation parameters
-sim_steps = 401          # The number of steps in the trotter simulation
-timestep = 0.005          # The timestep for the trotter simulation
-shots = 10000             # Number of shots to run the simulation for - necessary only for damping channels
-amplitude_damping = True # Toggles on or off the amplitude damping channel
-dephasing = True         # Toggles on or off the dephasing channel
+sim_steps = int(sys.argv[1])          # The number of steps in the trotter simulation
+timestep = float(sys.argv[2])         # The timestep for the trotter simulation
+shots = int(sys.argv[3])              # Number of shots to run the simulation for - necessary only for damping channels
+amplitude_damping = False # Toggles on or off the amplitude damping channel
+dephasing = False         # Toggles on or off the dephasing channel
 time = np.round(np.arange(sim_steps) * timestep, 5)
 
 ## Damping rates; damping probability = sin(theta/2)^2 = (gamma_all*timestep)
 ## Amplitude Damping Rate and conversion to theta
-gamma_damp = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+gamma_damp = np.array([3.15e12/1e12, float(sys.argv[4]), 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
 theta_damp = 2*np.arcsin(np.sqrt(gamma_damp*timestep))
 ## Dephasing Rate and conversion to theta
-gamma_dephase = np.array([9.0e11/1e12, 9.0e11/1e12, 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+gamma_dephase = np.array([9.0e11/1e12, float(sys.argv[5]), 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
 theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
+
+if int(sys.argv[6]) == 1:
+    amplitude_damping = True
+if int(sys.argv[7]) == 1:
+    dephasing = True
 
 ## Global parameters
 omega = np.array([4.79e13, 4.8e13, 4.785e13, 6e12])/1e12 # omega_a,b,c,l

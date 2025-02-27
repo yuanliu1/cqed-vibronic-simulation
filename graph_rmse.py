@@ -1,36 +1,36 @@
 ################################################################
-##  Calculates the Root Mean Squared Error of a list of graphs, in the order,
-##  1-2, 2-3, 3-4, ... if (mode = 0) and
-##  1-2, 1-3, 1-4, ... if (mode != 0)
+##  Calculates the Root Mean Squared Error of a list of graphs
+##     compares all of the runs of a data element against itself (fully connected graph)
+##     and then compares the first data element agaisnt all of the others : 1-2, 1-3, 1-4, ...
 ################################################################
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-mode = 0
-show_std_dev = False
+show_std_dev = True
 normalize = True
 
-#datafiles = [["data/benchmarks/fock_level/data/32fock_1.out", "data/benchmarks/fock_level/data/32fock_2.out", "data/benchmarks/fock_level/data/32fock_3.out"],
-#             ["data/benchmarks/fock_level/data/16fock_1.out", "data/benchmarks/fock_level/data/16fock_2.out", "data/benchmarks/fock_level/data/16fock_3.out"],
-#             ["data/benchmarks/fock_level/data/8fock_1.out", "data/benchmarks/fock_level/data/8fock_2.out", "data/benchmarks/fock_level/data/8fock_3.out"],
-#             ["data/benchmarks/fock_level/data/4fock_1.out", "data/benchmarks/fock_level/data/4fock_2.out","data/benchmarks/fock_level/data/4fock_3.out"],
-#             ["data/benchmarks/fock_level/data/2fock_1.out", "data/benchmarks/fock_level/data/2fock_2.out", "data/benchmarks/fock_level/data/2fock_3.out"]]
-#datafiles = [["data/benchmarks/fock_level/data/noisy-8fock_1.out", "data/benchmarks/fock_level/data/noisy-8fock_2.out", "data/benchmarks/fock_level/data/noisy-8fock_3.out"],
-#             ["data/benchmarks/fock_level/data/noisy-4fock_1.out", "data/benchmarks/fock_level/data/noisy-4fock_2.out","data/benchmarks/fock_level/data/noisy-4fock_3.out"],
-#             ["data/benchmarks/fock_level/data/noisy-2fock_1.out", "data/benchmarks/fock_level/data/noisy-2fock_2.out", "data/benchmarks/fock_level/data/noisy-2fock_3.out"]]
-#datafiles = [["data/benchmarks/trotter/data/5fs_1.out", "data/benchmarks/trotter/data/5fs_2.out", "data/benchmarks/trotter/data/5fs_3.out"],
-#            ["data/benchmarks/trotter/data/10fs_1.out", "data/benchmarks/trotter/data/10fs_2.out", "data/benchmarks/trotter/data/10fs_3.out"], 
-#            ["data/benchmarks/trotter/data/20fs_1.out", "data/benchmarks/trotter/data/20fs_2.out", "data/benchmarks/trotter/data/20fs_3.out"],
-#             ["data/benchmarks/trotter/data/40fs_1.out", "data/benchmarks/trotter/data/40fs_2.out", "data/benchmarks/trotter/data/40fs_3.out"]]
-#datafiles = [["data/benchmarks/shots/data/20000shots_1.out", "data/benchmarks/shots/data/20000shots_2.out", "data/benchmarks/shots/data/20000shots_3.out"],
-#            ["data/benchmarks/shots/data/10000shots_1.out", "data/benchmarks/shots/data/10000shots_2.out", "data/benchmarks/shots/data/10000shots_3.out"],
-#             ["data/benchmarks/shots/data/5000shots_1.out", "data/benchmarks/shots/data/5000shots_2.out", "data/benchmarks/shots/data/5000shots_3.out"],
-#             ["data/benchmarks/shots/data/2500shots_1.out", "data/benchmarks/shots/data/2500shots_2.out", "data/benchmarks/shots/data/2500shots_3.out"]]
-#datafiles = [["data/benchmarks/trotter/data/5fs_1.out"], ["data/benchmarks/trotter/data/5fs_2.out"], ["data/benchmarks/trotter/data/5fs_3.out"], ["data/benchmarks/trotter/data/5fs_1.out"]] # Use mode 0
-#datafiles = [["data/benchmarks/shots/data/20000shots_1.out"], ["data/benchmarks/shots/data/20000shots_2.out"], ["data/benchmarks/shots/data/20000shots_3.out"], ["data/benchmarks/shots/data/20000shots_1.out"]] # Use mode 0
-datafiles = [["data/benchmarks/fock_level/data/32fock_1.out"], ["data/benchmarks/fock_level/data/32fock_2.out"], ["data/benchmarks/fock_level/data/32fock_3.out"], ["data/benchmarks/fock_level/data/32fock_1.out"]]
+#### Remove comments around the repective datafile array to calculate RMSE
+
+prefix = "data/benchmarks/sim_pass_"
+passes_count = 5
+
+### Benchmark Data
+## Fock level benchmarks
+data = ["/amp_all3.15_dep_all0.9_Fock16_10k_10fs.out", "/amp_all3.15_dep_all0.9_Fock8_10k_10fs.out", "/amp_all3.15_dep_all0.9_Fock4_10k_10fs.out", "/amp_all3.15_dep_all0.9_Fock2_10k_10fs.out"]
+## Trotter Step size benchmarks
+#data = ["/amp_all3.15_dep_all0.9_Fock8_10k_5fs.out", "/amp_all3.15_dep_all0.9_Fock8_10k_10fs.out", "/amp_all3.15_dep_all0.9_Fock8_10k_20fs.out", "/amp_all3.15_dep_all0.9_Fock8_10k_40fs.out"]
+## Shot count benchmarks
+#data = ["/amp_all3.15_dep_all0.9_Fock8_20k_10fs.out","/amp_all3.15_dep_all0.9_Fock8_10k_10fs.out", "/amp_all3.15_dep_all0.9_Fock8_5k_10fs.out", "/amp_all3.15_dep_all0.9_Fock8_2500_10fs.out"]
+
+datafiles = []
+for file in data:
+    sim_passes = []
+    for x in range(passes_count):
+        sim_passes.append(prefix + str(x+1) + file)
+    datafiles.append(sim_passes)
+
 
 def get_csv_data(file):
     ## The regex delimiter used to get the data from the C2QA output
@@ -45,6 +45,7 @@ def get_csv_data(file):
     columns = df.columns.to_numpy()
     return rows, columns
 
+## Assumes all datafiles are of the same trotter step size and duration
 def get_data(datafiles):
     rows = []
     columns = []
@@ -59,16 +60,33 @@ def get_data(datafiles):
     return rows, columns[0], avg_std_dev, avg_chromophores
 
 
-rowsA_list, columnsA, std_dev_A, avg_chromophores_A= get_data(datafiles[0])
+rowsA_list, columnsA, std_dev_A, avg_chromophores_A = get_data(datafiles[0])
 std_devs = []
 if normalize:
     std_dev_A = std_dev_A / avg_chromophores_A
 std_devs.append(std_dev_A)
+
+## compares the all of the runs of the first data element against each other
+sum_squared = np.zeros(len(rowsA_list[0]))
+n = np.zeros(len(rowsA_list[0]))
+
+for i in range(0,len(datafiles[0])-1):
+    for j in range(i,len(datafiles[0])):
+        for x in range(len(rowsA_list[i])):
+            for y in range(len(columnsA)):
+                sum_squared[x] += np.square(rowsA_list[i][x][y] - rowsA_list[j][x][y])
+                n[x] += 1
+
+rmse = np.sqrt(sum_squared / n)
+if normalize:
+    rmse = rmse / avg_chromophores_A
+print("1-1: " + str(rmse))
+
+## compares the every run of the first data element against all of the runs of the other data elements
 rowsB_list = []
 columnsB = []
 avg_chromophores_B = []
 std_dev_B = 0
-
 for i in range(1,len(datafiles)):
     rowsB_list, columnsB, std_dev_B, avg_chromophores_B = get_data(datafiles[i])
     if normalize:
@@ -91,16 +109,12 @@ for i in range(1,len(datafiles)):
     rmse = np.sqrt(sum_squared / (n))
     if normalize:
         rmse = rmse / avg_chromophores_A
-
-    if mode == 0:
-        rowsA_list = rowsB_list
-        columnsA = columnsB
-        print(str(i) + '-' + str(i+1) + ": " + str(rmse))
-    else:
-        print('1-' + str(i+1) + ': ' + str(rmse))
+    print('1-' + str(i+1) + ': ' + str(rmse))
 if show_std_dev:
     for x in range(len(std_devs)):
         print("std dev " + str(x+1) + ":" + str(std_devs[x]))
-    
+        
 
 
+            
+        
