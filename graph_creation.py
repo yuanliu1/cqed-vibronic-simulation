@@ -57,7 +57,7 @@ def get_numpy_data(file):
     columns = data[data.files[0]]
     return rows, columns
 
-## Graph genreration
+## Graph generation
 fig = plt.figure()
 gs = fig.add_gridspec(len(datafiles), hspace=0)
 axs = gs.subplots(sharex=True, sharey=True)

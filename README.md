@@ -7,13 +7,14 @@ We used a variety of software packages in our simulation, which are listed below
 
 | Package | Version(s) |
 |---------|------------|
-| qutip | 5.0.1 |
-| numpy | 1.23.2 |
-| scipy | 1.9.1 |
-| matplotlib | 3.5.3 |
-| python | 3.10.11 |
+| qutip | 5.0.0 |
+| numpy | 1.26.4 |
+| scipy | 1.15.2 |
+| matplotlib | 3.7.3 |
+| python | 3.10.16 |
 | pandas | 1.4.4 |
-| bosonic-qiskit | 11.2 ; 12.2.6 |
+| tqdm | 4.67.1 |
+| bosonic-qiskit | 12.2.6 |
 
 As bosonic-qiskit is not published to any package managers, the c2qa root folder needs to be added to the path before it can be imported. The simplest way of doing this is to have it in the same folder as the c2qa code that you are trying to run. Otherwise, the tutorials on their github show how it can be added to the path if the code and c2qa root folder are not in the same folder. 
 
