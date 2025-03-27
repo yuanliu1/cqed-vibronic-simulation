@@ -1,7 +1,7 @@
 ################################################################
 ##  Calculates the Root Mean Squared Error of a list of graphs
-##     compares all of the runs of a data element against itself (fully connected graph)
-##     and then compares the first data element agaisnt all of the others : 1-2, 1-3, 1-4, ...
+##    - compares all of the runs of a data element against itself (fully connected graph)
+##    - and then compares the first data element agaisnt all of the others : 1-2, 1-3, 1-4, ...
 ################################################################
 
 import pandas as pd

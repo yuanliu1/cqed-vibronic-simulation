@@ -1,10 +1,29 @@
 ################################################################
-##  As the C2QA package is not currently published to any package managers, 
-##  to use the package, add the 'c2qa' folder to the same folder as this code
+## Main simulation code pertaining to the paper
+## Simulation parameters can be set directly in the code or via command line parameters
 ################################################################
 import os
 import sys
-# module_path = os.path.abspath(os.path.join("../.."))
+
+import numpy as np
+import matplotlib.pyplot as plt
+from qiskit import ClassicalRegister, QuantumRegister
+from qiskit_aer.library import SaveDensityMatrix
+
+
+##  Note that the C2QA package is not currently published to any package managers. 
+##  The simplest way to use to use the package is add the 'c2qa' folder to the same repository as this code.
+##  A more proper method is to option is to configure the modulepath to point to the c2qa folder
+try:
+    import c2qa
+except:
+    output_string = "\nc2qa module not found: to install c2qa, clone https://github.com/C2QA/bosonic-qiskit.\n"
+    output_string += "Once the c2qa repository is cloned, you can either configure the modulepath in the code or move the c2qa repository in bosonic qiskit "
+    output_string += "to the same directory as this code\n\n"
+    sys.stderr.write(output_string)
+    sys.exit()
+
+## Not necessary, just another approach to install c2qa
 module_path = os.path.abspath(os.path.join("../../"))
 if module_path not in sys.path:
     sys.path.append(module_path)
@@ -13,24 +32,38 @@ if module_path not in sys.path:
 module_path = os.path.abspath(os.path.join("../../venv/Lib/site-packages"))
 if module_path not in sys.path:
     sys.path.append(module_path)
-import c2qa
-import numpy as np
-import matplotlib.pyplot as plt
-from qiskit import ClassicalRegister, QuantumRegister
-from qiskit_aer.library import SaveDensityMatrix
+
+
+## Usage Message
+def usage():
+    output_string = "\nUsage:\n"
+    output_string += "  ./3_chromophore_vibronic_simulation.py <output_name> <trotter_steps> <step_size> <shot_count> <damp_b> <deph_b> <damp_toggle> <deph_toggle> <qb_p_mode>\n\n"
+    output_string += "  (str) output_name - name to give to output data - do not include file extension\n"
+    output_string += "  (int) trotter_steps - number of iterations to run the simulation for\n"
+    output_string += "  (flt) step_size - length of a single trotter step in picoseconds\n"
+    output_string += "  (int) shot_count - number of shots to run in the simulator\n"
+    output_string += "  (flt) damp_b - amplitude damping value for chromophore B (default = 3.15)\n"
+    output_string += "  (flt) deph_b - dephasing value for chromophore B (default = 0.9)\n"
+    output_string += "  (int) damp_toggle - toggle for amplitude damping channel (0 = off, 1 = on)\n"
+    output_string += "  (int) deph_toggle - toggle for dephasing channel (0 = off, 1 = on)\n"
+    output_string += "  (int) qb_p_mode - qubits per mode; each qubit doubles the available states in each mode.\n\n"
+
+    sys.stderr.write(output_string)
+    sys.exit()
 
 ################################################################
 ##  Simulation Parameters
 ################################################################
 
-## Name of output files- use sys.argv[1] if you want to set output name via command line
-output_name = sys.argv[1]  # There will be a *.out and a *.{filetype} file if the simulation is successful
-output_filetype = "png" # The filetype for the matplotlib output - recommendations: 'png' or 'pdf'
-
 ## Circuit parameters
 global numberofmodes, numberofqubitspermode
+
+## Name of output files
+output_name = "test"
+output_filetype = "png"
+
 numberofmodes=4         # Number of qumodes in the simulation
-numberofqubitspermode=3 # Number of qubits for each qumode. Fock level = 2^(#qubits).
+numberofqubitspermode=2 # Number of qubits for each qumode. Fock level = 2^(#qubits).
 
 ## Simulation parameters
 sim_steps = 401          # The number of steps in the trotter simulation
@@ -49,13 +82,38 @@ gamma_dephase = np.array([9.0e11/1e12, 9.0e11/1e12, 9.0e11/1e12]) # [gamma_a, ga
 theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
 
 ## Global parameters
-omega = np.array([4.79e13, 4.8e13, 4.785e13, 6e12])/1e12 # omega_a,b,c,l
-delta_qa = np.array([5.00400599e11, 4.99487607e10])/1e12            # delta_ab,ac
-chi = np.array([-3.2e12, -3.6e12, -2.7e12])/1e12         # chi_a,b,c
-g_cd = np.array([3.38326237e12, 3.03151748e12, 3.70349480e12])/1e12    # g_cda,cdb,cdc
-g_cdl = (1.341640786499e12+0.0j)/1e12                            # g_cdl
-g_a = np.array([3e12, 2.7e12])/1e12                      # g_ab,ac
-g_al = np.array([-3e11, 4.05e11])/1e12                   # g_abl,acl
+omega = np.array([4.79e13, 4.8e13, 4.785e13, 6e12])/1e12                # omega_{a,b,c,l}
+delta_qa = np.array([5.00400599e11, 4.99487607e10])/1e12                # delta_{ab,ac}
+chi = np.array([-3.2e12, -3.6e12, -2.7e12])/1e12                        # chi_{a,b,c}
+g_cd = np.array([3.38326237e12, 3.03151748e12, 3.70349480e12])/1e12     # g_{cda,cdb,cdc}
+g_cdl = (1.341640786499e12+0.0j)/1e12                                   # g_cdl
+g_a = np.array([3e12, 2.7e12])/1e12                                     # g_{ab,ac}
+g_al = np.array([-3e11, 4.05e11])/1e12                                  # g_{abl,acl}
+
+################################################################
+##  Command line input - overrides some base parameters
+################################################################
+
+#### Try to get command line parameters - overwrites default variables
+if len(sys.argv) > 1:
+    try:
+        output_name = sys.argv[1]               # Name of output file
+        sim_steps = int(sys.argv[2])            # The number of steps in the trotter simulation
+        timestep = float(sys.argv[3])           # The timestep for the trotter simulation
+        shots = int(sys.argv[4])                # Number of shots to simulate
+        ## Damping Rate and conversion to theta   
+        gamma_damp = np.array([3.15e12/1e12, float(sys.argv[5]), 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+        theta_damp = 2*np.arcsin(np.sqrt(gamma_damp*timestep))
+        ## Dephasing Rate and conversion to theta
+        gamma_dephase = np.array([9.0e11/1e12, float(sys.argv[6]), 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+        theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
+        if int(sys.argv[7]) == 1:               # Toggles Amplitude Damping Channel
+            amplitude_damping = True
+        if int(sys.argv[8]) == 1:               # Toggles Dephasing Channel
+            dephasing = True
+        numberofqubitspermode=sys.argv[9] # Number of qubits for each qumode. Fock level = 2^(#qubits).
+    except:
+        usage()
 
 ################################################################
 ##  Circuit Building
