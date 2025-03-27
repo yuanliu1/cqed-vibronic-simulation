@@ -159,7 +159,7 @@ axes.plot(timelist, n_B, label="Exact B", linewidth=1.2, color='#0500b4')
 axes.plot(timelist, n_C, label="Exact C", linewidth=1.2, color='#ff0000')
 
 # Read in and plot data file to compare against exact simulation
-data_file = 'idealSim_1k.out'
+data_file = 'data/general/idealSim_Fock8_10k.out'
 df = pd.read_csv(data_file, delimiter='\s*\(|[\+-]\d\.\d+e[\+-]\d+j\) *\(|[\+-]\d\.\d+e[\+-]\d+j\)', engine = 'python')
 df.drop(columns=df.columns[0], axis=1, inplace=True)
 df.drop(columns=df.columns[len(df.columns)-1], axis=1, inplace=True)

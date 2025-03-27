@@ -8,10 +8,6 @@ We used a variety of software packages in our simulation, which are listed below
 | Package | Version(s) |
 |---------|------------|
 | qutip | 5.0.0 |
-| numpy | 1.26.4 |
-| scipy | 1.15.2 |
-| matplotlib | 3.7.3 |
-| python | 3.10.16 |
 | pandas | 1.4.4 |
 | tqdm | 4.67.1 |
 | bosonic-qiskit | 12.2.6 |

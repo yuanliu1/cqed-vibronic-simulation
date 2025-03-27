@@ -1,3 +1,5 @@
+## Calculates parameters for the simulation based on some base parameters
+
 import numpy as np
 import matplotlib.pyplot as plt
 

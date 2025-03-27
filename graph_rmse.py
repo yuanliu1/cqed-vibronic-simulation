@@ -16,7 +16,7 @@ normalize = True
 prefix = "data/benchmarks/sim_pass_"
 passes_count = 5
 
-### Benchmark Data
+### Benchmark Data - comment in/out whichever dataset to benchmark
 ## Fock level benchmarks
 data = ["/amp_all3.15_dep_all0.9_Fock16_10k_10fs.out", "/amp_all3.15_dep_all0.9_Fock8_10k_10fs.out", "/amp_all3.15_dep_all0.9_Fock4_10k_10fs.out", "/amp_all3.15_dep_all0.9_Fock2_10k_10fs.out"]
 ## Trotter Step size benchmarks
