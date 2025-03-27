@@ -21,11 +21,11 @@ legend_loc = 1 # Where to put the legend in the graph
 data_zorder = 2.5 # The order of the data on the graphs - <2 means than the secondary data should be in front
 
 ## Primary data files - solid line
-datafiles = ['data/general/amplitudedamping.out', 'data/general/amplitudedamping-9.45.out', 'data/general/amplitudedamping-1.05.out']
+datafiles = ['data/general/amp_3.15-3.15-3.15_Fock8_10k.out', 'data/general/amp_3.15-9.45-3.15_Fock8_10k.out', 'data/general/amp_3.15-1.05-3.15_Fock8_10k.out']
 datalabels = ['Damp.', 'Incr.', 'Decr.']
 
 ## Secondary data files - dashed line
-secondarydata = ['data/general/nodamping.out', datafiles[0], datafiles[0]]
+secondarydata = ['data/general/idealSim_Fock8_10k.out', datafiles[0], datafiles[0]]
 secondarydatalabels = ['Pure', datalabels[0], datalabels[0]]
 
 
