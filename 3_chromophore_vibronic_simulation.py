@@ -14,14 +14,7 @@ from qiskit_aer.library import SaveDensityMatrix
 ##  Note that the C2QA package is not currently published to any package managers. 
 ##  The simplest way to use to use the package is add the 'c2qa' folder to the same repository as this code.
 ##  A more proper method is to option is to configure the modulepath to point to the c2qa folder
-try:
-    import c2qa
-except:
-    output_string = "\nc2qa module not found: to install c2qa, clone https://github.com/C2QA/bosonic-qiskit.\n"
-    output_string += "Once the c2qa repository is cloned, you can either configure the modulepath in the code or move the c2qa repository in bosonic qiskit "
-    output_string += "to the same directory as this code\n\n"
-    sys.stderr.write(output_string)
-    sys.exit()
+import c2qa
 
 ## Not necessary, just another approach to install c2qa
 module_path = os.path.abspath(os.path.join("../../"))

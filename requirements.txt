@@ -1,0 +1,16 @@
+## Requirements document for bosonic qiskit 12.2.6
+## run 'pip install -r requirements.txt' to automatically download all necessary packages
+
+
+## Requirements from bosonic qiskit
+qiskit==1.0.1
+qiskit-aer==0.13.3
+qiskit-ibm-runtime==0.20.0
+qutip==5.0.0
+setuptools==75.8.0
+matplotlib==3.7.3
+pylatexenc==2.10
+
+## Additional requirements
+pandas==1.4.4
+tqdm==4.67.1
