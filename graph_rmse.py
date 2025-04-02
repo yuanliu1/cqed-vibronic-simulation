@@ -1,7 +1,7 @@
 ################################################################
 ##  Calculates the Root Mean Squared Error of a list of graphs
 ##    - compares all of the runs of a data element against itself (fully connected graph)
-##    - and then compares the first data element agaisnt all of the others : 1-2, 1-3, 1-4, ...
+##    - and then compares the first data element agaisnt all of the others : 1-2, 1-3, 1-4, ... (fully connected bipartite graph)
 ################################################################
 
 import pandas as pd
@@ -11,8 +11,7 @@ import numpy as np
 show_std_dev = True
 normalize = True
 
-#### Remove comments around the repective datafile array to calculate RMSE
-
+## Folder locations and number of passes to compute the RSME of - expect quadratic growth in the number of comparisons
 prefix = "data/benchmarks/sim_pass_"
 passes_count = 5
 

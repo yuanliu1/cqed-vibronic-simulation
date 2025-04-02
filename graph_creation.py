@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ################################################################
-##  Simulation Parameters
+##  Graph Parameters
 ################################################################
 
 datatype = 0 # 0 - csv, else - numpy binary

@@ -30,16 +30,21 @@ if module_path not in sys.path:
 ## Usage Message
 def usage():
     output_string = "\nUsage:\n"
-    output_string += "  ./3_chromophore_vibronic_simulation.py <output_name> <trotter_steps> <step_size> <shot_count> <damp_b> <deph_b> <damp_toggle> <deph_toggle> <qb_p_mode>\n\n"
+    output_string += "  python ./3_chromophore_vibronic_simulation.py <output_name> <trotter_steps> <step_size> <shot_count> <qb_p_mode> <damp_toggle> <damp_a> <damp_b> <damp_c> <deph_toggle> <deph_a> <deph_b> <deph_c>   \n\n"
     output_string += "  (str) output_name - name to give to output data - do not include file extension\n"
     output_string += "  (int) trotter_steps - number of iterations to run the simulation for\n"
     output_string += "  (flt) step_size - length of a single trotter step in picoseconds\n"
     output_string += "  (int) shot_count - number of shots to run in the simulator\n"
+    output_string += "  (int) qb_p_mode - qubits per mode; each qubit doubles the available states in each mode.\n"
+    output_string += "  (int) damp_toggle - toggle for amplitude damping channel. (0 = off, 1 = on)\n"
+    output_string += "  (flt) damp_a - amplitude damping value for chromophore A (default = 3.15)\n"
     output_string += "  (flt) damp_b - amplitude damping value for chromophore B (default = 3.15)\n"
-    output_string += "  (flt) deph_b - dephasing value for chromophore B (default = 0.9)\n"
-    output_string += "  (int) damp_toggle - toggle for amplitude damping channel (0 = off, 1 = on)\n"
+    output_string += "  (flt) damp_c - amplitude damping value for chromophore C (default = 3.15)\n"
     output_string += "  (int) deph_toggle - toggle for dephasing channel (0 = off, 1 = on)\n"
-    output_string += "  (int) qb_p_mode - qubits per mode; each qubit doubles the available states in each mode.\n\n"
+    output_string += "  (flt) deph_a - dephasing value for chromophore A (default = 0.9)\n"
+    output_string += "  (flt) deph_b - dephasing value for chromophore B (default = 0.9)\n"
+    output_string += "  (flt) deph_c - dephasing value for chromophore C (default = 0.9)\n\n"
+    
 
     sys.stderr.write(output_string)
     sys.exit()
@@ -64,14 +69,13 @@ timestep = 0.005          # The timestep for the trotter simulation
 shots = 10000             # Number of shots to run the simulation for - necessary only for damping channels
 amplitude_damping = True # Toggles on or off the amplitude damping channel
 dephasing = True         # Toggles on or off the dephasing channel
-time = np.round(np.arange(sim_steps) * timestep, 5)
 
 ## Damping rates; damping probability = sin(theta/2)^2 = (gamma_all*timestep)
 ## Amplitude Damping Rate and conversion to theta
-gamma_damp = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+gamma_damp = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c]
 theta_damp = 2*np.arcsin(np.sqrt(gamma_damp*timestep))
 ## Dephasing Rate and conversion to theta
-gamma_dephase = np.array([9.0e11/1e12, 9.0e11/1e12, 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+gamma_dephase = np.array([9.0e11/1e12, 9.0e11/1e12, 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c]
 theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
 
 ## Global parameters
@@ -90,23 +94,27 @@ g_al = np.array([-3e11, 4.05e11])/1e12                                  # g_{abl
 #### Try to get command line parameters - overwrites default variables
 if len(sys.argv) > 1:
     try:
+        amplitude_damping = False
+        dephasing = False
         output_name = sys.argv[1]               # Name of output file
         sim_steps = int(sys.argv[2])            # The number of steps in the trotter simulation
         timestep = float(sys.argv[3])           # The timestep for the trotter simulation
         shots = int(sys.argv[4])                # Number of shots to simulate
+        numberofqubitspermode=int(sys.argv[5])       # Number of qubits for each qumode. Fock level = 2^(#qubits).
         ## Damping Rate and conversion to theta   
-        gamma_damp = np.array([3.15e12/1e12, float(sys.argv[5]), 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+        if int(sys.argv[6]) == 1:               # Toggles Amplitude Damping Channel
+            amplitude_damping = True
+        gamma_damp = np.array([float(sys.argv[7]), float(sys.argv[8]), float(sys.argv[9])]) # [gamma_a, gamma_b, gamma_c, gamma_l]
         theta_damp = 2*np.arcsin(np.sqrt(gamma_damp*timestep))
         ## Dephasing Rate and conversion to theta
-        gamma_dephase = np.array([9.0e11/1e12, float(sys.argv[6]), 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
-        theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
-        if int(sys.argv[7]) == 1:               # Toggles Amplitude Damping Channel
-            amplitude_damping = True
-        if int(sys.argv[8]) == 1:               # Toggles Dephasing Channel
+        if int(sys.argv[10]) == 1:              # Toggles Dephasing Channel
             dephasing = True
-        numberofqubitspermode=sys.argv[9] # Number of qubits for each qumode. Fock level = 2^(#qubits).
+        gamma_dephase = np.array([float(sys.argv[11]), float(sys.argv[12]), float(sys.argv[13])]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+        theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
     except:
         usage()
+
+time = np.round(np.arange(sim_steps) * timestep, 5)
 
 ################################################################
 ##  Circuit Building
