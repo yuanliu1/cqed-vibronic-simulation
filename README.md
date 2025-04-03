@@ -6,6 +6,12 @@ This is a codebase for hardware-efficient ab initio quantum simulation of dissip
 
 1. [Setup](#setup)
 2. [Contents](#contents)
+   -  [Main Simulation](#main)
+   -  [Supplementary Simulations](#supplementary)
+      - [Exact Simulation](#exact)
+      - [CNOT Noise](#cnotnoise)
+      - [Conditional Displacement Noise](#cdnoise)
+   -  [Data Processing](#processing)
 3. [Contact](#contact)
 4. [License](#license)
 
@@ -36,7 +42,7 @@ Move the `/bosonic-qiskit/c2qa` folder to `/cqed-vibronic-simulation/c2qa`. This
 ![image](https://github.com/user-attachments/assets/1e89b7b7-aabb-4718-8d04-03a06ef228f6)
 
 ## Contents <a name="contents"></a>
-### Main Simulation (3_chromophore_vibronic_simulation.py)
+### Main Simulation (3_chromophore_vibronic_simulation.py) <a name="main"></a>
 There are two ways to run our simulation: via the command line interface or through direct editing of the parameters in the code. The latter is relatively straightforwards - simply navigate to the "Simulation Parameters" section of the code and edit what is needed. As for the command line parameters, we require a total of 13 simulation parameters, a combination of integers (int), strings (str), and decimal values (flt) in the order below. Note that the environment must be set up before this code can run (see [Setup](#setup))
 
 ```
@@ -63,8 +69,19 @@ An example of a proper command is provided below,
 python ./3_chromophore_vibronic_simulation.py test 400 0.005 10000 3 1 3.15 3.15 3.15 1 0.9 0.9 0.9
 ```
 
-where we have the output set to "test", with 400 steps at a 5fs step size, with 10000 shots and the default damping and dephasing channels. The output of this program will be two files in the current directory with names
+where we have the output set to "test", with 400 steps at a 5fs step size, with 10000 shots and the default damping and dephasing channels turned on. 
 
+The output of this program will be two files in the directory from which the code is executed with names "<output_name>.out", containing raw data, and "<output_name>.png", containing a graph of the data. All ".out" files can be used in some of our other scripts (see 3_chromophore_exact.py and 
+
+### Supplementary Simulations <a name="supplementary"></a>
+
+**3_chromophore_exact.py** <a name="exact"></a>
+
+**3_chromophore_vibornic_simulation_cnot_noise.ipynb** <a name="cnotnoise"></a>
+
+**3_chromophore_vibornic_simulation_CD_noise.ipynb** <a name="cdnoise"></a>
+
+### Data Processing <a name="processing"></a>
 
 ## Contact <a name="contact"></a>
 
