@@ -11,7 +11,6 @@ This is a codebase for hardware-efficient ab initio quantum simulation of dissip
       - [Exact Simulation](#exact)
       - [CNOT Noise](#cnotnoise)
       - [Conditional Displacement Noise](#cdnoise)
-   -  [Miscellaneous](#misc)
 3. [Performance](#perf)
 4. [Contact](#contact)
 5. [License](#license)
@@ -86,10 +85,7 @@ This Jupyter notebook adds varying levels of CNOT noise using the qiskit noise m
 
 **3_chromophore_vibornic_simulation_CD_noise.ipynb** <a name="cdnoise"></a>
 
-This Jupyter notebook tests to see what effect realistic CD-infidelity rates will have on our simulation. You can execute this the same way as any other Jupyter notebook.
-
-### Miscellaneous <a name="misc"></a>
-
+This Jupyter notebook tests to see what effect realistic Conditional Displacement infidelity rates will have on our simulation. You can execute this the same way as any other Jupyter notebook.
 
 
 ## Performance <a name="perf"></a>
@@ -97,5 +93,11 @@ This Jupyter notebook tests to see what effect realistic CD-infidelity rates wil
 In terms of runtime, these simulations may take a long time to run, depending on the parameters chosen. As expected, changes in trotter step and shot counts provide a linear time scaling (a 2x increase in either count will result in a 2x increase in runtime). It gets more interesting with the enabling of noise channels and varying fock levels. The elimination of noise channels or a reduction in qubits per qumode provide exponential decreases in runtime, thanks to the limitations of classical simulation. Additionally, the choice of simulation hardware also matters - GPUs can provide a considerable speedup in simulation time if they are available. However, as of right now, Bosonic Qiskit does not directly support GPU simulation - it'll be necessary to modify the c2qa source code to enable it. If you are interested in GPU simulation, contact us and we can assist. Otherwise, old but relevant CPU runtime data can be located in this repository under ```data/benchmarks/runtimes.xlsx``` - these numbers can be easily extrapolated to fit your current system. 
 
 ## Contact <a name="contact"></a>
+
+For questions, comments, or support, contact:
+
+Daniel Dong (ddong2@ncsu.edu, danieldong1.618@gmail.com)
+
+Nam Vu (nam.vu@yale.edu)
 
 ## License <a name="license"></a>
