@@ -11,9 +11,10 @@ This is a codebase for hardware-efficient ab initio quantum simulation of dissip
       - [Exact Simulation](#exact)
       - [CNOT Noise](#cnotnoise)
       - [Conditional Displacement Noise](#cdnoise)
-   -  [Data Processing](#processing)
-3. [Contact](#contact)
-4. [License](#license)
+   -  [Miscellaneous](#misc)
+3. [Performance](#perf)
+4. [Contact](#contact)
+5. [License](#license)
 
 
 ## Setup <a name="setup"></a>
@@ -71,17 +72,29 @@ python ./3_chromophore_vibronic_simulation.py test 400 0.005 10000 3 1 3.15 3.15
 
 where we have the output set to "test", with 400 steps at a 5fs step size, with 10000 shots and the default damping and dephasing channels turned on. 
 
-The output of this program will be two files in the directory from which the code is executed with names "<output_name>.out", containing raw data, and "<output_name>.png", containing a graph of the data. All ".out" files can be used in some of our other scripts (see 3_chromophore_exact.py and 
+The output of this program will be two files in the directory from which the code is executed with names "<output_name>.out", containing raw data, and "<output_name>.png", containing a graph of the data. The filetype of the graphical representation can be changed if desired by changing the ```output_filetype``` parameter in the code to anything that is supported by matplotlib's pyplot (e.g. "pdf", "svg") while the ".out" files can all be used for further data processing and aggregation.
 
 ### Supplementary Simulations <a name="supplementary"></a>
 
 **3_chromophore_exact.py** <a name="exact"></a>
 
+This is an exact simulation of the 3-chromophore system that we are modeling in QuTiP, which graphs the output of the exact simulation against a specified data file. We were unable to simulate with the amplitude damping and dephasing channels so the output can only be compared against another noiseless simulation. There are no command line parameters to be specified as this code is relatively inflexible due to it's singular purpose of providing a comparison point to ensure that our Trotter simulation was correct. 
+
 **3_chromophore_vibornic_simulation_cnot_noise.ipynb** <a name="cnotnoise"></a>
+
+This Jupyter notebook adds varying levels of CNOT noise using the qiskit noise model to our simulation, to see what are acceptable noise parameters for our simulation, if we were to simulate on a real system. You can execute this the same way as any other Jupyter notebook.
 
 **3_chromophore_vibornic_simulation_CD_noise.ipynb** <a name="cdnoise"></a>
 
-### Data Processing <a name="processing"></a>
+This Jupyter notebook tests to see what effect realistic CD-infidelity rates will have on our simulation. You can execute this the same way as any other Jupyter notebook.
+
+### Miscellaneous <a name="misc"></a>
+
+
+
+## Performance <a name="perf"></a>
+
+In terms of runtime, these simulations may take a long time to run, depending on the parameters chosen. As expected, changes in trotter step and shot counts provide a linear time scaling (a 2x increase in either count will result in a 2x increase in runtime). It gets more interesting with the enabling of noise channels and varying fock levels. The elimination of noise channels or a reduction in qubits per qumode provide exponential decreases in runtime, thanks to the limitations of classical simulation. Additionally, the choice of simulation hardware also matters - GPUs can provide a considerable speedup in simulation time if they are available. However, as of right now, Bosonic Qiskit does not directly support GPU simulation - it'll be necessary to modify the c2qa source code to enable it. If you are interested in GPU simulation, contact us and we can assist. Otherwise, old but relevant CPU runtime data can be located in this repository under ```data/benchmarks/runtimes.xlsx``` - these numbers can be easily extrapolated to fit your current system. 
 
 ## Contact <a name="contact"></a>
 
