@@ -1,53 +1,120 @@
 ################################################################
-##  As the C2QA package is not currently published to any package managers, 
-##  to use the package, add the 'c2qa' folder to the same folder as this code
+## Main simulation code pertaining to the paper
+## Simulation parameters can be set directly in the code or via command line parameters
 ################################################################
 import os
 import sys
 
-import c2qa
 import numpy as np
 import matplotlib.pyplot as plt
 from qiskit import ClassicalRegister, QuantumRegister
 from qiskit_aer.library import SaveDensityMatrix
 
+
+##  Note that the C2QA package is not currently published to any package managers. 
+##  The simplest way to use to use the package is add the 'c2qa' folder to the same repository as this code.
+##  A more proper method is to option is to configure the modulepath to point to the c2qa folder
+import c2qa
+
+## Not necessary, just another approach to install c2qa
+module_path = os.path.abspath(os.path.join("../../"))
+if module_path not in sys.path:
+    sys.path.append(module_path)
+
+# Cheat to get MS Visual Studio Code Jupyter server to recognize Python venv
+module_path = os.path.abspath(os.path.join("../../venv/Lib/site-packages"))
+if module_path not in sys.path:
+    sys.path.append(module_path)
+
+
+## Usage Message
+def usage():
+    output_string = "\nUsage:\n"
+    output_string += "  python ./3_chromophore_vibronic_simulation.py <output_name> <trotter_steps> <step_size> <shot_count> <qb_p_mode> <damp_toggle> <damp_a> <damp_b> <damp_c> <deph_toggle> <deph_a> <deph_b> <deph_c>   \n\n"
+    output_string += "  (str) output_name - name to give to output data - do not include file extension\n"
+    output_string += "  (int) trotter_steps - number of iterations to run the simulation for\n"
+    output_string += "  (flt) step_size - length of a single trotter step in picoseconds\n"
+    output_string += "  (int) shot_count - number of shots to run in the simulator\n"
+    output_string += "  (int) qb_p_mode - qubits per mode; each qubit doubles the available states in each mode.\n"
+    output_string += "  (int) damp_toggle - toggle for amplitude damping channel. (0 = off, 1 = on)\n"
+    output_string += "  (flt) damp_a - amplitude damping value for chromophore A (default = 3.15)\n"
+    output_string += "  (flt) damp_b - amplitude damping value for chromophore B (default = 3.15)\n"
+    output_string += "  (flt) damp_c - amplitude damping value for chromophore C (default = 3.15)\n"
+    output_string += "  (int) deph_toggle - toggle for dephasing channel (0 = off, 1 = on)\n"
+    output_string += "  (flt) deph_a - dephasing value for chromophore A (default = 0.9)\n"
+    output_string += "  (flt) deph_b - dephasing value for chromophore B (default = 0.9)\n"
+    output_string += "  (flt) deph_c - dephasing value for chromophore C (default = 0.9)\n\n"
+    
+
+    sys.stderr.write(output_string)
+    sys.exit()
+
 ################################################################
 ##  Simulation Parameters
 ################################################################
 
-## Name of output files- use sys.argv[1] if you want to set output name via command line
-output_name = sys.argv[1]  # There will be a *.out and a *.{filetype} file if the simulation is successful
-output_filetype = "png" # The filetype for the matplotlib output - recommendations: 'png' or 'pdf'
-
 ## Circuit parameters
 global numberofmodes, numberofqubitspermode
+
+## Name of output files
+output_name = "test"
+output_filetype = "png"
+
 numberofmodes=4         # Number of qumodes in the simulation
-numberofqubitspermode=3 # Number of qubits for each qumode. Fock level = 2^(#qubits).
+numberofqubitspermode=2 # Number of qubits for each qumode. Fock level = 2^(#qubits).
 
 ## Simulation parameters
-sim_steps = 201          # The number of steps in the trotter simulation
-timestep = 0.01          # The timestep for the trotter simulation
+sim_steps = 401          # The number of steps in the trotter simulation
+timestep = 0.005          # The timestep for the trotter simulation
 shots = 10000             # Number of shots to run the simulation for - necessary only for damping channels
 amplitude_damping = True # Toggles on or off the amplitude damping channel
-dephasing = False         # Toggles on or off the dephasing channel
-time = np.round(np.arange(sim_steps) * timestep, 5)
+dephasing = True         # Toggles on or off the dephasing channel
 
 ## Damping rates; damping probability = sin(theta/2)^2 = (gamma_all*timestep)
 ## Amplitude Damping Rate and conversion to theta
-gamma_damp = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+gamma_damp = np.array([3.15e12/1e12, 3.15e12/1e12, 3.15e12/1e12]) # [gamma_a, gamma_b, gamma_c]
 theta_damp = 2*np.arcsin(np.sqrt(gamma_damp*timestep))
 ## Dephasing Rate and conversion to theta
-gamma_dephase = np.array([9.0e11/1e12, 9.0e11/1e12, 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+gamma_dephase = np.array([9.0e11/1e12, 9.0e11/1e12, 9.0e11/1e12]) # [gamma_a, gamma_b, gamma_c]
 theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
 
 ## Global parameters
-omega = np.array([4.79e13, 4.8e13, 4.785e13, 6e12])/1e12 # omega_a,b,c,l
-delta_qa = np.array([8.934e11, 2.55e11])/1e12            # delta_ab,ac
-chi = np.array([-3.2e12, -3.6e12, -2.7e12])/1e12         # chi_a,b,c
-g_cd = np.array([4.63e12, 4.1323e12, 5.0938e12])/1e12    # g_cda,cdb,cdc
-g_cdl = (1.8974e12+0.0j)/1e12                            # g_cdl
-g_a = np.array([3e12, 2.7e12])/1e12                      # g_ab,ac
-g_al = np.array([-3e11, 4.05e11])/1e12                   # g_abl,acl
+omega = np.array([4.79e13, 4.8e13, 4.785e13, 6e12])/1e12                # omega_{a,b,c,l}
+delta_qa = np.array([5.00400599e11, 4.99487607e10])/1e12                # delta_{ab,ac}
+chi = np.array([-3.2e12, -3.6e12, -2.7e12])/1e12                        # chi_{a,b,c}
+g_cd = np.array([3.38326237e12, 3.03151748e12, 3.70349480e12])/1e12     # g_{cda,cdb,cdc}
+g_cdl = (1.341640786499e12+0.0j)/1e12                                   # g_cdl
+g_a = np.array([3e12, 2.7e12])/1e12                                     # g_{ab,ac}
+g_al = np.array([-3e11, 4.05e11])/1e12                                  # g_{abl,acl}
+
+################################################################
+##  Command line input - overrides some base parameters
+################################################################
+
+#### Try to get command line parameters - overwrites default variables
+if len(sys.argv) > 1:
+    try:
+        amplitude_damping = False
+        dephasing = False
+        output_name = sys.argv[1]               # Name of output file
+        sim_steps = int(sys.argv[2])            # The number of steps in the trotter simulation
+        timestep = float(sys.argv[3])           # The timestep for the trotter simulation
+        shots = int(sys.argv[4])                # Number of shots to simulate
+        numberofqubitspermode=int(sys.argv[5])       # Number of qubits for each qumode. Fock level = 2^(#qubits).
+        ## Damping Rate and conversion to theta   
+        if int(sys.argv[6]) == 1:               # Toggles Amplitude Damping Channel
+            amplitude_damping = True
+        gamma_damp = np.array([float(sys.argv[7]), float(sys.argv[8]), float(sys.argv[9])]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+        theta_damp = 2*np.arcsin(np.sqrt(gamma_damp*timestep))
+        ## Dephasing Rate and conversion to theta
+        if int(sys.argv[10]) == 1:              # Toggles Dephasing Channel
+            dephasing = True
+        gamma_dephase = np.array([float(sys.argv[11]), float(sys.argv[12]), float(sys.argv[13])]) # [gamma_a, gamma_b, gamma_c, gamma_l]
+        theta_dephase = 2*np.arcsin(np.sqrt(gamma_dephase*timestep))
+    except:
+        usage()
+
+time = np.round(np.arange(sim_steps) * timestep, 5)
 
 ################################################################
 ##  Circuit Building
@@ -79,11 +146,11 @@ def H0(tau, omega_list=omega, delta_list=delta_qa, reverse = False):
         for i_qumode in range(numberofmodes):
             circuit.cv_r(omega_t[i_qumode], qmr[i_qumode])
     circuit.barrier()
-
+    
 ## Build circuit for exp(-iH_1*tau)
 def H1(tau, chi_list = chi, g_cd_list = g_cd, reverse = False):
     chi_t = tau*chi_list/(2)
-    g_cdt = tau*g_cd_list/(2)*1j
+    g_cdt = tau*g_cd_list/(2)*1j*(-1)
     if not reverse:
         for i_qumode in range(numberofmodes-1):
             circuit.cv_c_r(chi_t[i_qumode], qmr[i_qumode], qbr[i_qumode])
@@ -95,21 +162,21 @@ def H1(tau, chi_list = chi, g_cd_list = g_cd, reverse = False):
             circuit.cv_c_r(chi_t[r_i_qumode], qmr[r_i_qumode], qbr[r_i_qumode])
     circuit.barrier()
 
-## Build circuit for exp(-iH_2*tau) Rotated version: Split H2XX and H2YY
+##title Build circuit for $\exp{(-iH_2\tau)}$ Rotated version: Split H2XX and H2YY
 def H2XX(tau, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
     g_at = 2*tau*g_a_list
     g_alt = -1j*tau*g_al_list
     if not reverse:
         for i_qumode in range(2): # ab and ac
             circuit.rxx(g_at[i_qumode]/2, qbr[0], qbr[1+i_qumode])
-    
-        ## Displaced qb for l controlled by sigma_a^x
+
+        # Displaced qb for l controlled by sigma_a^x
         circuit.swap(qbr[0], anc[0])
-        circuit.cv_c_d(1j*g_cdl*tau/(4), qmr[3], anc[0])
+        circuit.cv_c_d(-1j*g_cdl*tau/(4), qmr[3], anc[0])
         circuit.swap(qbr[0], anc[0])
         circuit.barrier()
-    
-        ## Displaced qb for l controlle by sigma_a^x*sigma_(b or c)^x
+
+        # Displaced qb for l controlle by sigma_a^x*sigma_(b or c)^x
         for i_qumode in range(1,3):
             circuit.h(qbr[0])
             circuit.h(qbr[i_qumode])
@@ -122,7 +189,7 @@ def H2XX(tau, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
             circuit.h(qbr[i_qumode])
             circuit.barrier()
     else:
-        ## Displaced qb for l controlle by sigma_a^x*sigma_(b or c)^x
+        # Displaced qb for l controlle by sigma_a^x*sigma_(b or c)^x
         for i_qumode in range(1,3):
             r_i_qumode = numberofmodes-1-i_qumode # reverse index
             circuit.h(qbr[0])
@@ -135,13 +202,13 @@ def H2XX(tau, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
             circuit.h(qbr[0])
             circuit.h(qbr[r_i_qumode])
             circuit.barrier()
-        
-        ## Displaced qb for l controlled by sigma_a^x
+
+        # Displaced qb for l controlled by sigma_a^x
         circuit.swap(qbr[0], anc[0])
-        circuit.cv_c_d(1j*g_cdl*tau/(4), qmr[3], anc[0])
+        circuit.cv_c_d(-1j*g_cdl*tau/(4), qmr[3], anc[0])
         circuit.swap(qbr[0], anc[0])
         circuit.barrier()
-        
+
         for i_qumode in range(2): # ab and ac
             r_i_qumode = 1-i_qumode # reverse index
             circuit.rxx(g_at[-i_qumode-1]/2, qbr[0], qbr[1+r_i_qumode])
@@ -152,14 +219,14 @@ def H2YY(tau, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
     if not reverse:
         for i_qumode in range(2): # ab and ac
             circuit.ryy(g_at[i_qumode]/2, qbr[0], qbr[1+i_qumode])
-    
-        ## Displaced qb for l controlled by sigma_a^x
+
+        # Displaced qb for l controlled by sigma_a^x
         circuit.swap(qbr[0], anc[0])
-        circuit.cv_c_d(1j*g_cdl*tau/(4), qmr[3], anc[0])
+        circuit.cv_c_d(-1j*g_cdl*tau/(4), qmr[3], anc[0])
         circuit.swap(qbr[0], anc[0])
         circuit.barrier()
-    
-        ## Displaced qb for l controlled by sigma_a^x*sigma_(b or c)^x
+
+        # Displaced qb for l controlled by sigma_a^x*sigma_(b or c)^x
         for i_qumode in range(1,3):
             circuit.rz(-np.pi/2,qbr[0])
             circuit.h(qbr[0])
@@ -176,7 +243,7 @@ def H2YY(tau, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
             circuit.rz(np.pi/2,qbr[i_qumode])
             circuit.barrier()
     else:
-        ## Displaced qb for l controlle by sigma_a^x*sigma_(b or c)^x
+        # Displaced qb for l controlle by sigma_a^x*sigma_(b or c)^x
         for i_qumode in range(1,3):
             r_i_qumode = numberofmodes-1-i_qumode # reverse index
             circuit.rz(np.pi/2,qbr[0])
@@ -193,13 +260,13 @@ def H2YY(tau, g_cdl=g_cdl, g_a_list=g_a, g_al_list=g_al, reverse = False):
             circuit.h(qbr[r_i_qumode])
             circuit.rz(-np.pi/2,qbr[r_i_qumode])
             circuit.barrier()
-        
-        ## Displaced qb for l controlled by sigma_a^x
+
+        # Displaced qb for l controlled by sigma_a^x
         circuit.swap(qbr[0], anc[0])
-        circuit.cv_c_d(1j*g_cdl*tau/(4), qmr[3], anc[0])
+        circuit.cv_c_d(-1j*g_cdl*tau/(4), qmr[3], anc[0])
         circuit.swap(qbr[0], anc[0])
         circuit.barrier()
-        
+
         for i_qumode in range(2): # ab and ac
             r_i_qumode = 1-i_qumode # reverse index
             circuit.ryy(g_at[-i_qumode-1]/2, qbr[0], qbr[1+r_i_qumode])
@@ -269,9 +336,9 @@ for i in range(sim_steps):
 ## Graphing population dynamics
 fig, ax = plt.subplots()
 ax.set_title('Population Dynamics in the 1 state for Trotterized Hamiltonian')
-ax.plot(time, rho_A)
-ax.plot(time, rho_B)
-ax.plot(time, rho_C)
+ax.plot(time, rho_A, '#2F0033')
+ax.plot(time, rho_B, '#0500B4')
+ax.plot(time, rho_C, '#FF0000')
 ax.legend(['Transmon A', 'Transmon B', 'Transmon C'])
 
 ## Saving Graph and output file
