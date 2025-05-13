@@ -1,8 +1,9 @@
 ## run 'pip install -r requirements.txt' to automatically download all necessary packages
 
-## bosonic-qist will include its dependencies, too (e.g., Qiskit, matplotlib, numpy, scipy, etc.)
+## bosonic-qiskit will include its dependencies, too (e.g., Qiskit, matplotlib, numpy, scipy, etc.)
 bosonic-qiskit==13.1.1
 
-## Additional requirements
+## Additional requirements - other versions may work, these were the only ones officially tested
 pandas==1.4.4
 tqdm==4.67.1
+ipykernel==6.29.5

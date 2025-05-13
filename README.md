@@ -26,8 +26,8 @@ cd cqed-vibronic-simulation
 ```
 2. **Setup Python Environment.** This step is not strictly necessary, but highly recommended to maintain a clean working environment.
 - With Anaconda
-   - Setup : ```conda create -n NAME python=3.13```
-      - NAME refers to the name of your conda environment. Note that the python version is necessary for the Jupyter Notebooks to function properly - it doesn't necessarily have to be Python 13.
+   - Setup : ```conda create -n NAME python=3.12```
+      - NAME refers to the name of your conda environment. Note that the python version is necessary for the Jupyter Notebooks to function properly - it doesn't necessarily have to be Python 12.
    - Activation : ```conda activate NAME```
    - Deactivation: ```conda deactivate```
 ```
