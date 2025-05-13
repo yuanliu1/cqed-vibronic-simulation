@@ -19,25 +19,28 @@ This is a codebase for hardware-efficient ab initio quantum simulation of dissip
 ## Setup <a name="setup"></a>
 To set up the environment for executing the code in this repository, we recommend using a fresh `conda` environment to provide a cleaner python interface and avoid potential version conflicts. However, it is not necessary - all code should still run fine. The setup with or without conda should be the same. 
 
-1. **Clone the Necessary Repositories** into the desired directory:
+1. **Clone the Necessary Repositories** into the desired directory.
 ```
 git clone https://github.com/yuanliu1/cqed-vibronic-simulation
-git clone https://github.com/C2QA/bosonic-qiskit
-```
-2. **Switch to an older version of Bosonic Qiskit.** An older version is more likely to work (and necessary to work with our requirements.txt) with our code base. New changes may occur that have the potential to break certain aspects of existing code.
-```
-cd bosonic-qiskit
-git checkout v12.2.6
-cd ..
-```
-3. **Install Necessary Dependencies** using pip.
-```
 cd cqed-vibronic-simulation
+```
+2. **Setup Python Environment.** This step is not strictly necessary, but highly recommended to maintain a clean working environment.
+- With Anaconda
+   - Setup : ```conda create -n NAME python=3.13```
+      - NAME refers to the name of your conda environment. Note that the python version is necessary for the Jupyter Notebooks to function properly - it doesn't necessarily have to be Python 13.
+   - Activation : ```conda activate NAME```
+   - Deactivation: ```conda deactivate```
+```
+conda 
+```
+- Without Anaconda
+   - Setup : ```python -m venv venv```
+   - Activation : ```venv\Scripts\activate```
+   - Deactivation: ```deactivate```
+3. **Install Necessary Dependencies** using pip. Make sure to do this while the ```venv``` or ```conda``` environment is activated.
+```
 pip install -r requirements.txt
 ```
-4. **Add c2qa to path**
-
-Move the `/bosonic-qiskit/c2qa` folder to `/cqed-vibronic-simulation/c2qa`. This can be done in whatever way is most convenient for your file system (be it dragging and dropping or a `mv` command). There are other ways to get python to load the module, but this is the simplest way. The file structure should look like this when you're done:
 
 ![image](https://github.com/user-attachments/assets/1e89b7b7-aabb-4718-8d04-03a06ef228f6)
 
