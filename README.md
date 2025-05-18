@@ -30,9 +30,6 @@ cd cqed-vibronic-simulation
       - NAME refers to the name of your conda environment. Note that the python version is necessary for the Jupyter Notebooks to function properly - it doesn't necessarily have to be Python 12.
    - Activation : ```conda activate NAME```
    - Deactivation: ```conda deactivate```
-```
-conda 
-```
 - Without Anaconda
    - Setup : ```python -m venv venv```
    - Activation : ```venv\Scripts\activate```
