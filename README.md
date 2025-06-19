@@ -101,6 +101,6 @@ For questions, comments, or support, contact:
 
 Daniel Dong (ddong2@ncsu.edu, danieldong1.618@gmail.com)
 
-Nam Vu (nam.vu@yale.edu)
+Nam Vu (vu_p_nam@mit.edu)
 
 ## License <a name="license"></a>
