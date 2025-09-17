@@ -1,3 +1,6 @@
+[![arXiv](https://img.shields.io/badge/arXiv-2502.17820-b31b1b)](https://arxiv.org/abs/2502.17820)
+
+
 # cQED Vibronic Simulation
 ## Description
 This is a codebase for hardware-efficient ab initio quantum simulation of dissipative vibronic dynamics. Here, we have our simulation, graph creation, and parameter calculation code, as well as our data and figures that we were able to generate for our research paper. 
