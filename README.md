@@ -37,8 +37,9 @@ cd cqed-vibronic-simulation
 conda 
 ```
 - Without Anaconda
+   - Venv Installation : ```pip install virtualenv```
    - Setup : ```python -m venv venv```
-   - Activation : ```venv\Scripts\activate```
+   - Activation : ```source venv/bin/activate```
    - Deactivation: ```deactivate```
 3. **Install Necessary Dependencies** using pip. Make sure to do this while the ```venv``` or ```conda``` environment is activated.
 ```
